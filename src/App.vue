@@ -82,7 +82,7 @@ onMounted(() => {
 
 <style scoped>
 .flip-container {
-  perspective: 1000px;
+  perspective: 1000px; /* Ensures 3D perspective is applied */
   cursor: pointer;
   width: 100%;
   height: 100%;
@@ -93,12 +93,12 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   position: relative;
-  transform-style: preserve-3d;
+  transform-style: preserve-3d; /* Maintains 3D space for children */
   transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .flip-card.flipped {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg); /* Flips the card */
 }
 
 .card-front,
@@ -106,20 +106,19 @@ onMounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
+  backface-visibility: hidden; /* Ensures one side is hidden when flipped */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .card-front {
-  z-index: 2;
-  transform: rotateY(0deg);
+  z-index: 2; /* Ensures front is visible initially */
+  transform: rotateY(0deg); /* Front stays in place */
 }
 
 .card-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg); /* Back rotates to face the user on flip */
   background-color: #f8f9fa;
   color: #000;
   z-index: 1;
@@ -136,30 +135,30 @@ onMounted(() => {
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0;
+  opacity: 0; /* Initially hidden for fade-in effect */
   transition:
     opacity 1s cubic-bezier(0.25, 0.1, 0.25, 1),
     transform 1s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .offset-small {
-  transform: translateY(50px);
+  transform: translateY(50px); /* Offset for small */
 }
 
 .offset-medium {
-  transform: translateY(100px);
+  transform: translateY(100px); /* Offset for medium */
 }
 
 .offset-large {
-  transform: translateY(150px);
+  transform: translateY(150px); /* Offset for large */
 }
 
 .column-image.visible {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1; /* Image fades in when visible */
+  transform: translateY(0); /* Reset offset */
 }
 
 .v-col {
-  height: 80vh;
+  height: 80vh; /* Example height */
 }
 </style>
