@@ -1,85 +1,40 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+const totalImages = 126 // Gesamtanzahl der Bilder
+const imagesPerRow = 3 // Anzahl der Bilder pro Zeile
+
+// Berechnung der Reihen und Bildpfade
+const rows = Array.from({ length: Math.ceil(totalImages / imagesPerRow) }, (_, rowIndex) => {
+  return Array.from(
+    { length: imagesPerRow },
+    (_, colIndex) => rowIndex * imagesPerRow + colIndex + 1,
+  ).filter((imageNumber) => imageNumber <= totalImages)
+})
+
+const getImagePath = (imageNumber: number) => {
+  return new URL(`./assets/photography/${imageNumber}.png`, import.meta.url).href
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <v-app>
+    <v-container fluid class="pa-0">
+      <v-row v-for="(row, rowIndex) in rows" :key="'row-' + rowIndex" no-gutters>
+        <v-col v-for="imageNumber in row" :key="'image-' + imageNumber" cols="4">
+          <img :src="getImagePath(imageNumber)" :alt="`Bild ${imageNumber}`" class="column-image" />
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.column-image {
+  width: 100%; /* Füllt die gesamte Breite der Spalte */
+  height: 100%; /* Füllt die gesamte Höhe der Spalte */
+  object-fit: cover; /* Schneidet das Bild passend zu, ohne das Seitenverhältnis zu verzerren */
+  display: block; /* Entfernt mögliche Lücken um das Bild */
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.v-col {
+  height: 80vh; /* Beispielhöhe für die Spalten */
 }
 </style>
