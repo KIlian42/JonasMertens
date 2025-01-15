@@ -1,164 +1,103 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-const totalImages = 126 // Total number of images
-const imagesPerRow = 3 // Number of images per row
-
-// Function to generate the image path
-const getImagePath = (imageNumber: number) => {
-  return new URL(`./assets/photography/${imageNumber}.png`, import.meta.url).href
-}
-
-// Calculate rows for the grid
-const rows = Array.from({ length: Math.ceil(totalImages / imagesPerRow) }, (_, rowIndex) => {
-  return Array.from(
-    { length: imagesPerRow },
-    (_, colIndex) => rowIndex * imagesPerRow + colIndex + 1,
-  ).filter((imageNumber) => imageNumber <= totalImages)
-})
-
-// Flip states for each card
-const flippedStates = ref<Array<boolean>>(Array(totalImages).fill(false))
-
-// Toggle flip state
-const toggleFlip = (index: number) => {
-  flippedStates.value[index] = !flippedStates.value[index]
-}
-
-// Initialize scroll animation
-onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible')
-        }
-      })
-    },
-    { threshold: 0.1 },
-  )
-
-  const images = document.querySelectorAll('.fade-in')
-  images.forEach((image) => observer.observe(image))
-})
-</script>
-
 <template>
   <v-app>
-    <v-container fluid class="pa-0">
-      <v-row v-for="(row, rowIndex) in rows" :key="'row-' + rowIndex" no-gutters>
-        <v-col
-          v-for="(imageNumber, colIndex) in row"
-          :key="'image-' + imageNumber"
-          cols="4"
-          class="flip-container"
-          @click="toggleFlip(imageNumber - 1)"
-        >
-          <div class="flip-card" :class="{ flipped: flippedStates[imageNumber - 1] }">
-            <!-- Front (Image) -->
-            <div class="card-front">
-              <img
-                :src="getImagePath(imageNumber)"
-                :alt="`Bild ${imageNumber}`"
-                :class="[
-                  'column-image',
-                  'fade-in',
-                  colIndex === 0 ? 'offset-small' : '',
-                  colIndex === 1 ? 'offset-medium' : '',
-                  colIndex === 2 ? 'offset-large' : '',
-                ]"
-              />
-            </div>
-            <!-- Back (Text) -->
-            <div class="card-back">
-              <p>Some text</p>
-            </div>
+    <v-container fluid class="pa-0 ma-0 full-size">
+      <v-row no-gutters class="pa-0 ma-0 full-size">
+        <!-- Spacer Column -->
+        <v-col cols="1" class="d-flex align-center justify-center" style="max-width: 50px"></v-col>
+
+        <!-- Buttons Column -->
+        <v-col cols="2" class="buttons-column">
+          <div class="sticky-buttons">
+            <RouterLink to="/">
+              <btn text @click="onButtonClick('Jonas L. Mertens')">
+                <h2 class="extra-bold">Jonas Mertens</h2>
+              </btn>
+            </RouterLink>
+            <RouterLink to="/contact">
+              <btn text @click="onButtonClick('Contact')">
+                <h2 class="extra-bold">Contact</h2>
+              </btn>
+            </RouterLink>
           </div>
+        </v-col>
+
+        <!-- Content Column -->
+        <v-col cols="9" class="d-flex align-center justify-center content-column">
+          <RouterView />
         </v-col>
       </v-row>
     </v-container>
   </v-app>
 </template>
 
+<script>
+import { RouterLink, RouterView } from 'vue-router'
+
+export default {
+  methods: {
+    onButtonClick(buttonName) {
+      console.log(`${buttonName} button clicked!`)
+    },
+  },
+}
+</script>
+
 <style scoped>
-.flip-container {
-  perspective: 1000px; /* Ensures 3D perspective is applied */
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-  position: relative;
+.full-size {
+  height: 100vh; /* Full height for the container */
 }
 
-.flip-card {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d; /* Maintains 3D space for children */
-  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-
-.flip-card.flipped {
-  transform: rotateY(180deg); /* Flips the card */
-}
-
-.card-front,
-.card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden; /* Ensures one side is hidden when flipped */
+.buttons-column {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.card-front {
-  z-index: 2; /* Ensures front is visible initially */
-  transform: rotateY(0deg); /* Front stays in place */
+.sticky-buttons {
+  position: sticky; /* Make the buttons sticky */
+  top: 0; /* Stick to the top of the viewport */
+  height: 100vh; /* Full height to allow vertical centering */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center the buttons */
+  background-color: white; /* Optional: Prevent overlap artifacts */
+  z-index: 1; /* Ensure it stays on top if necessary */
 }
 
-.card-back {
-  transform: rotateY(180deg); /* Back rotates to face the user on flip */
-  background-color: #f8f9fa;
-  color: #000;
-  z-index: 1;
+.content-column {
+  padding: 16px; /* Add padding for better spacing */
 }
 
-.card-back p {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: bold;
+/* Styling für die Buttons */
+.custom-button {
+  transition: transform 0.2s ease-in-out;
+  text-transform: none;
+  padding: 0;
+  margin-bottom: 4px; /* Weniger vertikaler Abstand zwischen den Buttons */
+  cursor: pointer;
 }
 
-.column-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  opacity: 0; /* Initially hidden for fade-in effect */
-  transition:
-    opacity 1s cubic-bezier(0.25, 0.1, 0.25, 1),
-    transform 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+/* Extra-Bold Styling */
+.extra-bold {
+  font-size: 25px;
+  font-weight: 800; /* Maximale Schriftstärke */
+  line-height: 1.2; /* Geringerer Abstand zwischen den Zeilen */
 }
 
-.offset-small {
-  transform: translateY(50px); /* Offset for small */
+/* Standard-Stile für RouterLink entfernen */
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.offset-medium {
-  transform: translateY(100px); /* Offset for medium */
+a:hover {
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
-.offset-large {
-  transform: translateY(150px); /* Offset for large */
-}
-
-.column-image.visible {
-  opacity: 1; /* Image fades in when visible */
-  transform: translateY(0); /* Reset offset */
-}
-
-.v-col {
-  height: 80vh; /* Example height */
+/* Spezifisch für RouterLink */
+router-link {
+  text-decoration: none;
+  color: inherit;
 }
 </style>
