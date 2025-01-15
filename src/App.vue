@@ -30,15 +30,12 @@
   </v-app>
 </template>
 
-<script>
+<script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 
-export default {
-  methods: {
-    onButtonClick(buttonName) {
-      console.log(`${buttonName} button clicked!`)
-    },
-  },
+// Typdefinition für den Parameter
+function onButtonClick(buttonName: string): void {
+  console.log(`${buttonName} button clicked!`)
 }
 </script>
 
