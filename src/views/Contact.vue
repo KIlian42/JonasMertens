@@ -2,9 +2,9 @@
 
 <template>
   <p>
-    Inquiries: maxmastermann@example.com
+    Inquiries: maxmustermann@example.com
     <br />
-    Instagram: @maxmastermann
+    Instagram: @maxmustermann
     <br />
     Privacy Policy & Imprint
   </p>

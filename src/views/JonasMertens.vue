@@ -45,6 +45,7 @@ onMounted(() => {
 
 <template>
   <v-container fluid class="pa-0">
+    <div style="min-height: 70px" />
     <v-row v-for="(row, rowIndex) in rows" :key="'row-' + rowIndex" no-gutters>
       <v-col
         v-for="(imageNumber, colIndex) in row"

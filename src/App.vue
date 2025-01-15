@@ -3,14 +3,14 @@
     <v-container fluid class="pa-0 ma-0 full-size">
       <v-row no-gutters class="pa-0 ma-0 full-size">
         <!-- Spacer Column -->
-        <v-col cols="1" class="d-flex align-center justify-center" style="max-width: 50px"></v-col>
+        <v-col cols="1" class="d-flex align-center justify-center" style="max-width: 30px"></v-col>
 
         <!-- Buttons Column -->
         <v-col cols="2" class="buttons-column">
           <div class="sticky-buttons">
             <RouterLink to="/">
               <btn text @click="onButtonClick('Jonas L. Mertens')">
-                <h2 class="extra-bold">Jonas Mertens</h2>
+                <h2 class="extra-bold">Jonas Lión M.</h2>
               </btn>
             </RouterLink>
             <RouterLink to="/contact">
@@ -23,7 +23,9 @@
 
         <!-- Content Column -->
         <v-col cols="9" class="d-flex align-center justify-center content-column">
-          <RouterView />
+          <transition name="fade">
+            <router-view />
+          </transition>
         </v-col>
       </v-row>
     </v-container>
@@ -88,7 +90,7 @@ a {
 }
 
 a:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
   cursor: pointer;
 }
 
@@ -96,5 +98,19 @@ a:hover {
 router-link {
   text-decoration: none;
   color: inherit;
+}
+
+/* Define the fade-in transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>
