@@ -16,5 +16,6 @@ import MainComponent from './components/Main_component/Main_component.vue'
 v-container {
   background-color: white;
   height: 100%;
+  overflow: hidden;
 }
 </style>
