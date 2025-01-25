@@ -5,6 +5,7 @@
   align-items: center;
   height: 100%;
   padding: 80px 50px;
+  overflow: auto;
 }
 
 .textbox {
