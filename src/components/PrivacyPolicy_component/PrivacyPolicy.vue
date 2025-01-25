@@ -34,7 +34,7 @@
         href="https://www.bfdi.bund.de/DE/Infothek/Anschriften_Links/anschriften_links-node.html"
         target="_blank"
       >
-        https://www.bfdi.bund.de/DE/Infothek/Anschriften_Links/anschriften_links-node.html</a
+        bfdi.bund.de</a
       >. <br /><br />
       <b>Recht auf Datenübertragbarkeit</b>
       <br /><br />
