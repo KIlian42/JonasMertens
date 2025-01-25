@@ -1,13 +1,11 @@
 .mainphone {
   position: relative;
-  padding-top: 10%;
   width: 100vw;
   height: 100vh;
 }
 
 .mainfullscreen {
   position: relative;
-  padding-left: 20%;
   width: 100vw;
   height: 100vh;
 }
