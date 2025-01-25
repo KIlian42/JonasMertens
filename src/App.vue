@@ -15,5 +15,6 @@ import MainComponent from './components/Main_component/Main_component.vue'
 <style scoped>
 v-container {
   background-color: white;
+  height: 100%;
 }
 </style>
