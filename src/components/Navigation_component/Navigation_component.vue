@@ -13,18 +13,16 @@
       </RouterLink>
     </div>
     <div v-else class="navigationfullscreen">
-      <div class="routerbox">
-        <RouterLink to="/">
-          <btn>
-            <h2 class="extra-bold">Jonas Lión M.</h2>
-          </btn>
-        </RouterLink>
-        <RouterLink to="/contact">
-          <btn>
-            <h2 class="extra-bold">Contact</h2>
-          </btn>
-        </RouterLink>
-      </div>
+      <RouterLink to="/">
+        <btn>
+          <h2 class="extra-bold">Jonas Lión M.</h2>
+        </btn>
+      </RouterLink>
+      <RouterLink to="/contact">
+        <btn>
+          <h2 class="extra-bold">Contact</h2>
+        </btn>
+      </RouterLink>
     </div>
   </div>
 </template>

@@ -31,6 +31,9 @@
       <br />
       Unsere E-Mail-Adresse finden Sie oben im Impressum.
     </div>
+    <div class="corner-element">
+      <v-icon> mdi-keyboard-backspace </v-icon>
+    </div>
   </div>
 </template>
 
