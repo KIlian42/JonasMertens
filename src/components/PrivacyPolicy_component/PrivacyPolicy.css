@@ -2,51 +2,20 @@
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center; /* Zentrierung auf der gesamten Seite */
-  height: 100%; /* Vollständige Höhe */
-  max-width: 100%; /* Kein Überlaufen */
-  padding: 0; /* Kein zusätzliches Außenpadding */
-  background-color: #f9f9f9; /* Optional: Hintergrundfarbe */
+  align-items: center;
+  width: 100%;
+  min-height: 100vh; /* Sichere Höhe über die gesamte Bildschirmhöhe */
+  overflow: auto;
 }
 
 .textbox {
   text-align: left;
-  width: 90%; /* Begrenzte Breite, damit es auch auf schmalen Bildschirmen passt */
-  max-width: 800px; /* Maximale Breite für größere Bildschirme */
-  padding: 20px; /* Innenabstand für angenehme Lesbarkeit */
-  background-color: white; /* Hintergrund für Lesbarkeit */
-  border: 1px solid #ddd; /* Optionaler Rahmen */
-  border-radius: 8px; /* Abgerundete Ecken */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Schatten für Tiefe */
-  overflow: auto; /* Verhindert das Überlaufen von Inhalten */
+  width: 100%;
+  padding: 10%;
+  padding-top: 5%;
 }
 
-.textbox h2 {
-  font-size: 24px; /* Größere Schriftgröße für Überschriften */
-  margin-bottom: 20px; /* Abstand unter der Überschrift */
-  color: #222; /* Dunklere Schriftfarbe */
-}
-
-.textbox a {
-  color: #007bff; /* Farbe für Links */
-  text-decoration: none; /* Keine Unterstreichung */
-}
-
-.textbox a:hover {
-  text-decoration: underline; /* Unterstrich beim Hover */
-}
-
-.textbox b {
-  color: #000; /* Hervorgehobener Text in Schwarz */
-}
-
-@media (max-width: 768px) {
-  .textbox {
-    padding: 10px; /* Reduziertes Padding für kleinere Bildschirme */
-    font-size: 14px; /* Kleinere Schrift für Mobilgeräte */
-  }
-
-  .textbox h2 {
-    font-size: 20px; /* Überschriften für kleine Bildschirme anpassen */
-  }
+a {
+  color: inherit;
+  text-decoration: none;
 }
