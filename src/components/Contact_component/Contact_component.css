@@ -5,12 +5,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 85vh;
-}
-
-.textbox {
-  position: relative;
-  bottom: 10vh;
+  height: 100%;
+  padding-bottom: 20px;
 }
 
 .corner-element {
@@ -19,6 +15,7 @@
   bottom: 15px;
   font-size: 25px;
   cursor: pointer;
+  color: black;
 }
 
 .corner-element:hover {

@@ -1,1 +1,13 @@
-/* CSS */
+.mainphone {
+  position: relative;
+  padding-top: 10vh;
+  width: 100vw;
+  height: 100vh;
+}
+
+.mainfullscreen {
+  position: relative;
+  padding-left: 20vw;
+  width: 100vw;
+  height: 100vh;
+}

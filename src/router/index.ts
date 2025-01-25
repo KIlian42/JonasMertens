@@ -13,6 +13,21 @@ const router = createRouter({
       name: 'contact',
       component: () => import('../components/Contact_component/Contact_component.vue'),
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../components/Login_component/Login_component.vue'),
+    },
+    {
+      path: '/privacypolicy',
+      name: 'privacypolicy',
+      component: () => import('../components/PrivacyPolicy_component/PrivacyPolicy.vue'),
+    },
+    {
+      path: '/imprint',
+      name: 'imprint',
+      component: () => import('../components/Imprint_component/Imprint_component.vue'),
+    },
   ],
 })
 

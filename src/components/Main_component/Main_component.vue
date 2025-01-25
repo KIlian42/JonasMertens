@@ -1,9 +1,7 @@
 <template>
-  <v-row class="pa-0 ma-0">
-    <v-col :cols="currentViewClass === 'phone' ? 12 : 10" class="pa-0 ma-0">
-      <router-view />
-    </v-col>
-  </v-row>
+  <div :class="currentViewClass === 'phone' ? 'mainphone' : 'mainfullscreen'">
+    <RouterView />
+  </div>
 </template>
 
 <script setup lang="ts">

@@ -4,7 +4,7 @@ export function getViewClass() {
   const isSmallScreen = ref(false)
 
   const checkScreenSize = () => {
-    isSmallScreen.value = window.matchMedia('(max-width: 900px)').matches
+    isSmallScreen.value = window.matchMedia('(max-width: 1100px)').matches
   }
 
   onMounted(() => {
