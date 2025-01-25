@@ -1,6 +1,6 @@
 <template>
   <div class="center-content">
-    <div>
+    <div class="textbox">
       Inquiries: maxmustermann@example.com
       <br />
       Instagram: @maxmustermann

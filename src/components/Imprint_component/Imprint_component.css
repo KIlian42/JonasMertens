@@ -7,8 +7,9 @@
 }
 
 .textbox {
-  padding: 10%;
   text-align: left;
+  width: 100%;
+  padding-left: 30%;
 }
 
 .corner-element {
