@@ -9,7 +9,13 @@
 .textbox {
   text-align: left;
   width: 100%;
-  padding-left: 30%;
+  padding: 10%;
+}
+
+@media (min-width: 1101px) {
+  .textbox {
+    padding-left: 30%;
+  }
 }
 
 .corner-element {

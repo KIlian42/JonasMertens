@@ -7,6 +7,13 @@
 }
 
 .textbox {
-  padding: 10%;
   text-align: left;
+  width: 100%;
+  padding: 10%;
+}
+
+@media (min-width: 1101px) {
+  .textbox {
+    padding-left: 30%;
+  }
 }
