@@ -1,0 +1,12 @@
+.center-content {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.textbox {
+  padding: 10%;
+  text-align: left;
+}

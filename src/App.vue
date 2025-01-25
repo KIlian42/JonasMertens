@@ -12,4 +12,6 @@ import Navigation from './components/Navigation_component/Navigation_component.v
 import MainComponent from './components/Main_component/Main_component.vue'
 </script>
 
-<style scoped></style>
+<style scoped>
+/* CSS */
+</style>

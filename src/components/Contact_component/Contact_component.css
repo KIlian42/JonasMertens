@@ -1,12 +1,13 @@
-/* CSS */
-
 .center-content {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
-  padding-bottom: 20px;
+}
+
+.textbox {
+  text-align: left;
 }
 
 .corner-element {
@@ -20,4 +21,33 @@
 
 .corner-element:hover {
   transform: scale(1.05);
+}
+
+.container {
+  display: flex;
+  align-items: center; /* Zentriert Inhalte vertikal */
+  gap: 4px; /* Abstand zwischen Elementen */
+}
+
+.highlight-text {
+  display: inline-block;
+}
+.highlight-text:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
+router-link {
+  text-decoration: none;
+  color: inherit;
 }
