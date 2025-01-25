@@ -9,9 +9,10 @@
 .textbox {
   text-align: left;
   width: 100%;
+  padding: 10%;
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1101px) {
   .textbox {
     padding-left: 30%;
   }
