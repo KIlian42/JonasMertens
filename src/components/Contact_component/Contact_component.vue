@@ -1,17 +1,17 @@
 <template>
   <div class="center-content">
     <div class="textbox">
-      Inquiries: maxmustermann@example.com
+      Anfragen: maxmustermann@example.com
       <br />
       Instagram: @maxmustermann
       <br />
       <div class="container">
         <RouterLink to="/privacypolicy">
-          <div class="highlight-text">Privacy Policy</div>
+          <div class="highlight-text">Datenschutzerklärung</div>
         </RouterLink>
         <span>&</span>
         <RouterLink to="/imprint">
-          <div class="highlight-text">Imprint</div>
+          <div class="highlight-text">Impressum</div>
         </RouterLink>
       </div>
     </div>
