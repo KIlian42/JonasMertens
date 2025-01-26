@@ -5,6 +5,14 @@
       <v-card-text>
         <v-form>
           <v-text-field
+            v-model="name"
+            label="Benutzername"
+            type="name"
+            outlined
+            dense
+            class="mb-4"
+          ></v-text-field>
+          <v-text-field
             v-model="password"
             label="Passwort"
             type="password"
@@ -22,9 +30,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const name = ref('')
 const password = ref('')
 
 const login = () => {
+  console.log('Name:', name.value)
   console.log('Password:', password.value)
 }
 </script>
