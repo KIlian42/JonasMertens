@@ -1,5 +1,8 @@
 <template>
   <div class="center-content">
+    <!-- Ankerpunkt -->
+    <div ref="anchor" class="anchor-point"></div>
+
     <div class="textbox">
       <h2><b>Datenschutzerklärung</b></h2>
       <br />
@@ -88,8 +91,27 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+// Ref für den Ankerpunkt
+const anchor = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  // Scrollt zum Ankerpunkt beim Laden der Komponente
+  anchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+})
+</script>
 
 <style scoped>
 @import url('./PrivacyPolicy.css');
+
+.anchor-point {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 1px;
+  pointer-events: none;
+}
 </style>
