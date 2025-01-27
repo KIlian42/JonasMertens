@@ -1,8 +1,8 @@
 <template>
   <div class="center-content">
+    <div ref="anchor" class="anchor-point"></div>
     <div class="textbox">
       <h2><b>Impressum</b></h2>
-
       Angaben gemäß § 5 TMG
       <br />
       Jonas Lión Mertens
@@ -36,7 +36,15 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const anchor = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  anchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+})
+</script>
 
 <style scoped>
 @import url('./Imprint_component.css');
