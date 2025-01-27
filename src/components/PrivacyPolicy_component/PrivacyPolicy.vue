@@ -84,7 +84,7 @@
       ein berechtigtes Interesse an der Speicherung von Cookies zur technisch fehlerfreien und
       reibungslosen Bereitstellung unserer Dienste. Sofern die Setzung anderer Cookies (z.B. für
       Analyse-Funktionen) erfolgt, werden diese in dieser Datenschutzerklärung separat behandelt.
-      <br />
+      <br /><br />
     </div>
   </div>
 </template>

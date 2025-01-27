@@ -1,6 +1,6 @@
 <template>
   <div class="login-box">
-    <!-- Eingeloggt -->
+    <div ref="anchor" class="anchor-point"></div>
     <v-card v-if="authStore.isLoggedIn" elevation="10" class="glassmorphism-card">
       <v-card-title class="text-h5 d-flex justify-center">Jonas Mertens</v-card-title>
       <v-card-text>
@@ -9,8 +9,6 @@
         </v-form>
       </v-card-text>
     </v-card>
-
-    <!-- Nicht eingeloggt -->
     <v-card
       v-else
       elevation="10"
@@ -45,9 +43,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+
+const anchor = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  anchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+})
 
 const username = ref('')
 const password = ref('')
