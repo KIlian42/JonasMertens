@@ -1,6 +1,8 @@
 <template>
   <div :class="currentViewClass === 'phone' ? 'mainphone' : 'mainfullscreen'">
-    <RouterView />
+    <Transition name="fade" mode="out-in">
+      <RouterView />
+    </Transition>
   </div>
 </template>
 
