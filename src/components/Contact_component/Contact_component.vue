@@ -17,13 +17,17 @@
     </div>
     <RouterLink to="/login">
       <div class="corner-element">
-        <v-icon> mdi-login </v-icon>
+        <v-icon v-if="authStore.isLoggedIn"> mdi-logout </v-icon>
+        <v-icon v-else> mdi-login </v-icon>
       </div>
     </RouterLink>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore'
+const authStore = useAuthStore()
+</script>
 
 <style scoped>
 @import url('./Contact_component.css');

@@ -1,6 +1,22 @@
 <template>
   <div class="login-box">
-    <v-card elevation="10" class="glassmorphism-card" :class="{ shake: loginErrorAnimation }">
+    <!-- Eingeloggt -->
+    <v-card v-if="authStore.isLoggedIn" elevation="10" class="glassmorphism-card">
+      <v-card-title class="text-h5 d-flex justify-center">Jonas Mertens</v-card-title>
+      <v-card-text>
+        <v-form>
+          <v-btn block class="custom-btn" @click="logout"> Logout </v-btn>
+        </v-form>
+      </v-card-text>
+    </v-card>
+
+    <!-- Nicht eingeloggt -->
+    <v-card
+      v-else
+      elevation="10"
+      class="glassmorphism-card"
+      :class="{ shake: loginErrorAnimation }"
+    >
       <v-card-title class="text-h5 d-flex justify-center">Jonas Mertens</v-card-title>
       <v-card-text>
         <v-form>
@@ -35,7 +51,7 @@ import { useAuthStore } from '@/stores/authStore'
 
 const username = ref('')
 const password = ref('')
-const loggedIn = ref(false)
+
 const loginErrorMessage = ref(false)
 const loginErrorAnimation = ref(false)
 
@@ -45,7 +61,6 @@ const authStore = useAuthStore()
 const login = () => {
   if (authStore.isValidLogin(username.value, password.value)) {
     loginErrorMessage.value = false
-    loggedIn.value = true
     authStore.setLoginStatus(true)
     router.push('/')
   } else {
@@ -55,6 +70,9 @@ const login = () => {
       loginErrorAnimation.value = false
     }, 1000)
   }
+}
+const logout = () => {
+  authStore.setLoginStatus(false)
 }
 </script>
 
