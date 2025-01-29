@@ -25,7 +25,7 @@ const onZoom = (
   container: d3.Selection<SVGGElement, unknown, null, undefined>,
   event: d3.D3ZoomEvent<SVGElement, unknown>,
 ) => {
-  container.attr('transform', event.transform)
+  container.attr('transform', event.transform.toString())
 }
 
 const initView = (ref: SVGElement | null) => {
@@ -63,15 +63,15 @@ const initView = (ref: SVGElement | null) => {
   const zoom = d3
     .zoom<SVGElement, unknown>()
     .scaleExtent([0.166, 30])
-    .on('zoom', (event) => onZoom(container, event))
-    .filter((event) => {
-      return !(event.type === 'wheel' && event.ctrlKey) // Prevent default zoom on pinch gestures
+    .on('zoom', (event: d3.D3ZoomEvent<SVGElement, unknown>) => onZoom(container, event))
+    .filter((event: any) => {
+      return !(event.type === 'wheel' && event.ctrlKey)
     })
 
   let lastDeltaY = 0
   svg
     .call(zoom)
-    .on('wheel', (event) => {
+    .on('wheel', (event: WheelEvent) => {
       event.preventDefault()
       const targetScale = d3.zoomTransform(svg.node()!).k * (event.deltaY < 0 ? 1.1 : 0.9)
       lastDeltaY = event.deltaY
@@ -80,15 +80,15 @@ const initView = (ref: SVGElement | null) => {
         .ease(d3.easeCubicOut)
         .tween('zoom', () => {
           const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
-          return (t) => {
+          return (t: number) => {
             svg.call(zoom.scaleTo, i(t))
           }
         })
     })
-    .on('touchmove', (event) => {
+    .on('touchmove', (event: TouchEvent) => {
       event.preventDefault()
     })
-    .on('gesturechange', (event) => {
+    .on('gesturechange', (event: any) => {
       event.preventDefault()
       const targetScale = d3.zoomTransform(svg.node()!).k * event.scale
       d3.transition()
@@ -96,7 +96,7 @@ const initView = (ref: SVGElement | null) => {
         .ease(d3.easeCubicOut)
         .tween('zoom', () => {
           const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
-          return (t) => {
+          return (t: number) => {
             svg.call(zoom.scaleTo, i(t))
           }
         })
