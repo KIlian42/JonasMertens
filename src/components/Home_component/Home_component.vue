@@ -59,7 +59,7 @@ const initView = (ref: SVGElement | null) => {
     .attr('height', 100)
     .style('fill', 'red')
 
-  // Init D3 zoom with smooth inertia effect
+  // Init D3 zoom with smooth inertia effect and mobile support
   const zoom = d3
     .zoom<SVGElement, unknown>()
     .scaleExtent([0.166, 30])
@@ -69,20 +69,38 @@ const initView = (ref: SVGElement | null) => {
     })
 
   let lastDeltaY = 0
-  svg.call(zoom).on('wheel', (event) => {
-    event.preventDefault()
-    const targetScale = d3.zoomTransform(svg.node()!).k * (event.deltaY < 0 ? 1.1 : 0.9)
-    lastDeltaY = event.deltaY
-    d3.transition()
-      .duration(300)
-      .ease(d3.easeCubicOut)
-      .tween('zoom', () => {
-        const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
-        return (t) => {
-          svg.call(zoom.scaleTo, i(t))
-        }
-      })
-  })
+  svg
+    .call(zoom)
+    .on('wheel', (event) => {
+      event.preventDefault()
+      const targetScale = d3.zoomTransform(svg.node()!).k * (event.deltaY < 0 ? 1.1 : 0.9)
+      lastDeltaY = event.deltaY
+      d3.transition()
+        .duration(300)
+        .ease(d3.easeCubicOut)
+        .tween('zoom', () => {
+          const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
+          return (t) => {
+            svg.call(zoom.scaleTo, i(t))
+          }
+        })
+    })
+    .on('touchmove', (event) => {
+      event.preventDefault()
+    })
+    .on('gesturechange', (event) => {
+      event.preventDefault()
+      const targetScale = d3.zoomTransform(svg.node()!).k * event.scale
+      d3.transition()
+        .duration(300)
+        .ease(d3.easeCubicOut)
+        .tween('zoom', () => {
+          const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
+          return (t) => {
+            svg.call(zoom.scaleTo, i(t))
+          }
+        })
+    })
 
   // Center container within SVG
   const centered = d3.zoomIdentity.translate(width.value / 2, height.value / 2)
@@ -115,5 +133,6 @@ onBeforeUnmount(() => {
   background-color: #ccc;
   width: 100%;
   height: 100%;
+  touch-action: none;
 }
 </style>
