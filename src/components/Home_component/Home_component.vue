@@ -1,12 +1,31 @@
 <template>
-  <div ref="container" class="map-wrapper" @mousedown="onMouseDown" @contextmenu.prevent>
+  <div
+    ref="container"
+    class="map-wrapper"
+    @mousedown="onMouseDown"
+    @contextmenu.prevent
+    @dragover.prevent
+    @drop="onDrop"
+  >
     <svg ref="svg" class="map-container"></svg>
-    <button class="add-rectangle-button" @click="addRectangle">+</button>
+    <button class="add-image-button" @click="openPopup">+</button>
+
+    <div v-if="showPopup" class="popup">
+      <div class="popup-content">
+        <label>X: <input v-model.number="newImage.x" type="number" /></label>
+        <label>Y: <input v-model.number="newImage.y" type="number" /></label>
+        <label>Width: <input v-model.number="newImage.width" type="number" /></label>
+        <label>Height: <input v-model.number="newImage.height" type="number" /></label>
+        <button @click="addImage">OK</button>
+        <button @click="closePopup">Cancel</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue'
+import { onMounted, ref, onBeforeUnmount, nextTick, computed } from 'vue'
+import { useImageStore } from '@/stores/imageStore'
 import * as d3 from 'd3'
 
 const container = ref<HTMLDivElement | null>(null)
@@ -16,6 +35,12 @@ const height = ref(0)
 let leftClickActive = false
 let rightClickActive = false
 let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
+
+const imageStore = useImageStore()
+const images = computed(() => imageStore.getImages)
+
+const showPopup = ref(false)
+const newImage = ref({ x: 0, y: 0, width: 100, height: 100 })
 
 const updateSize = () => {
   if (container.value) {
@@ -34,18 +59,50 @@ const onMouseDown = (event: MouseEvent) => {
   if (event.button === 2) rightClickActive = true
 
   if (leftClickActive && rightClickActive) {
-    addRectangle()
+    openPopup()
   }
 }
 
-const addRectangle = () => {
-  mainContainer
-    .append('rect')
-    .attr('x', 700)
-    .attr('y', 600)
-    .attr('width', 100)
-    .attr('height', 100)
-    .style('fill', 'red')
+const openPopup = () => {
+  showPopup.value = true
+}
+
+const closePopup = () => {
+  showPopup.value = false
+}
+
+const addImage = () => {
+  imageStore.addImage({ ...newImage.value })
+  renderImages()
+  closePopup()
+}
+
+const onDrop = (event: DragEvent) => {
+  event.preventDefault()
+  if (!event.clientX || !event.clientY || !svg.value) return
+
+  const svgElement = svg.value as SVGElement
+  const transform = d3.zoomTransform(svgElement)
+  const svgRect = svgElement.getBoundingClientRect()
+
+  const x = (event.clientX - svgRect.left - transform.x) / transform.k
+  const y = (event.clientY - svgRect.top - transform.y) / transform.k
+
+  imageStore.addImage({ x, y, width: 100, height: 100 })
+  renderImages()
+}
+
+const renderImages = () => {
+  mainContainer.selectAll('rect').remove()
+  images.value.forEach((img) => {
+    mainContainer
+      .append('rect')
+      .attr('x', img.x)
+      .attr('y', img.y)
+      .attr('width', img.width)
+      .attr('height', img.height)
+      .style('fill', 'blue')
+  })
 }
 
 const initView = (ref: SVGElement | null) => {
@@ -54,30 +111,7 @@ const initView = (ref: SVGElement | null) => {
   const svg = d3.select(ref)
   mainContainer = svg.append('g').classed('container', true)
 
-  // Draw initial red rectangles
-  mainContainer
-    .append('rect')
-    .attr('x', 100)
-    .attr('y', 100)
-    .attr('width', 100)
-    .attr('height', 100)
-    .style('fill', 'red')
-
-  mainContainer
-    .append('rect')
-    .attr('x', 300)
-    .attr('y', 200)
-    .attr('width', 100)
-    .attr('height', 100)
-    .style('fill', 'red')
-
-  mainContainer
-    .append('rect')
-    .attr('x', 500)
-    .attr('y', 400)
-    .attr('width', 100)
-    .attr('height', 100)
-    .style('fill', 'red')
+  renderImages()
 
   const zoom = d3
     .zoom<SVGElement, unknown>()
@@ -89,7 +123,6 @@ const initView = (ref: SVGElement | null) => {
 
   svg.call(zoom)
 
-  // Center container within SVG
   const centered = d3.zoomIdentity.translate(width.value / 2, height.value / 2)
   svg.call(zoom.transform, centered)
 }
@@ -131,16 +164,32 @@ onBeforeUnmount(() => {
   touch-action: none;
 }
 
-.add-rectangle-button {
+.add-image-button {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  background-color: red;
+  background-color: blue;
   color: white;
   border: none;
   padding: 10px 15px;
   font-size: 20px;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>
