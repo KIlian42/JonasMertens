@@ -5,7 +5,7 @@
       <h2><b>Impressum</b></h2>
       Angaben gemäß § 5 TMG
       <br />
-      Jonas Lión Mertens
+      Jonas Mertens
       <br />
       Wohnhaft: Straße Hausnummer Postleitzahl Stadt
       <br />

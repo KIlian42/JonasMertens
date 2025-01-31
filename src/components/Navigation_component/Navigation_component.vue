@@ -3,7 +3,7 @@
     <div v-if="currentViewClass === 'phone'" class="pa-0 ma-0 navigationphone">
       <RouterLink to="/">
         <btn>
-          <h2 class="extra-bold">Jonas Lión M.</h2>
+          <h2 class="extra-bold">Jonas Mertens</h2>
         </btn>
       </RouterLink>
       <RouterLink to="/contact">
@@ -15,7 +15,7 @@
     <div v-else class="navigationfullscreen">
       <RouterLink to="/">
         <btn>
-          <h2 class="extra-bold">Jonas Lión M.</h2>
+          <h2 class="extra-bold">Jonas Mertens</h2>
         </btn>
       </RouterLink>
       <RouterLink to="/contact">
