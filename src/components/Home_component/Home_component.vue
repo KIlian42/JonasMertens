@@ -1,6 +1,7 @@
 <template>
-  <div ref="container" class="map-wrapper">
+  <div ref="container" class="map-wrapper" @mousedown="onMouseDown" @contextmenu.prevent>
     <svg ref="svg" class="map-container"></svg>
+    <button class="add-rectangle-button" @click="addRectangle">+</button>
   </div>
 </template>
 
@@ -12,6 +13,9 @@ const container = ref<HTMLDivElement | null>(null)
 const svg = ref<SVGElement | null>(null)
 const width = ref(0)
 const height = ref(0)
+let leftClickActive = false
+let rightClickActive = false
+let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const updateSize = () => {
   if (container.value) {
@@ -21,21 +25,37 @@ const updateSize = () => {
   }
 }
 
-const onZoom = (
-  container: d3.Selection<SVGGElement, unknown, null, undefined>,
-  event: d3.D3ZoomEvent<SVGElement, unknown>,
-) => {
-  container.attr('transform', event.transform.toString())
+const onZoom = (event: d3.D3ZoomEvent<SVGElement, unknown>) => {
+  mainContainer.attr('transform', event.transform.toString())
+}
+
+const onMouseDown = (event: MouseEvent) => {
+  if (event.button === 0) leftClickActive = true
+  if (event.button === 2) rightClickActive = true
+
+  if (leftClickActive && rightClickActive) {
+    addRectangle()
+  }
+}
+
+const addRectangle = () => {
+  mainContainer
+    .append('rect')
+    .attr('x', 700)
+    .attr('y', 600)
+    .attr('width', 100)
+    .attr('height', 100)
+    .style('fill', 'red')
 }
 
 const initView = (ref: SVGElement | null) => {
   if (!ref) return
 
   const svg = d3.select(ref)
-  const container = svg.append('g').classed('container', true)
+  mainContainer = svg.append('g').classed('container', true)
 
-  // Draw three red rectangles
-  container
+  // Draw initial red rectangles
+  mainContainer
     .append('rect')
     .attr('x', 100)
     .attr('y', 100)
@@ -43,7 +63,7 @@ const initView = (ref: SVGElement | null) => {
     .attr('height', 100)
     .style('fill', 'red')
 
-  container
+  mainContainer
     .append('rect')
     .attr('x', 300)
     .attr('y', 200)
@@ -51,7 +71,7 @@ const initView = (ref: SVGElement | null) => {
     .attr('height', 100)
     .style('fill', 'red')
 
-  container
+  mainContainer
     .append('rect')
     .attr('x', 500)
     .attr('y', 400)
@@ -59,48 +79,15 @@ const initView = (ref: SVGElement | null) => {
     .attr('height', 100)
     .style('fill', 'red')
 
-  // Init D3 zoom with smooth inertia effect and mobile support
   const zoom = d3
     .zoom<SVGElement, unknown>()
     .scaleExtent([0.166, 30])
-    .on('zoom', (event: d3.D3ZoomEvent<SVGElement, unknown>) => onZoom(container, event))
+    .on('zoom', onZoom)
     .filter((event: any) => {
       return !(event.type === 'wheel' && event.ctrlKey)
     })
 
-  let lastDeltaY = 0
-  svg
-    .call(zoom)
-    .on('wheel', (event: WheelEvent) => {
-      event.preventDefault()
-      const targetScale = d3.zoomTransform(svg.node()!).k * (event.deltaY < 0 ? 1.1 : 0.9)
-      lastDeltaY = event.deltaY
-      d3.transition()
-        .duration(300)
-        .ease(d3.easeCubicOut)
-        .tween('zoom', () => {
-          const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
-          return (t: number) => {
-            svg.call(zoom.scaleTo, i(t))
-          }
-        })
-    })
-    .on('touchmove', (event: TouchEvent) => {
-      event.preventDefault()
-    })
-    .on('gesturechange', (event: any) => {
-      event.preventDefault()
-      const targetScale = d3.zoomTransform(svg.node()!).k * event.scale
-      d3.transition()
-        .duration(300)
-        .ease(d3.easeCubicOut)
-        .tween('zoom', () => {
-          const i = d3.interpolate(d3.zoomTransform(svg.node()!).k, targetScale)
-          return (t: number) => {
-            svg.call(zoom.scaleTo, i(t))
-          }
-        })
-    })
+  svg.call(zoom)
 
   // Center container within SVG
   const centered = d3.zoomIdentity.translate(width.value / 2, height.value / 2)
@@ -112,11 +99,19 @@ onMounted(() => {
     updateSize()
     initView(svg.value)
     window.addEventListener('resize', updateSize)
+    window.addEventListener('mouseup', () => {
+      leftClickActive = false
+      rightClickActive = false
+    })
   })
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateSize)
+  window.removeEventListener('mouseup', () => {
+    leftClickActive = false
+    rightClickActive = false
+  })
 })
 </script>
 
@@ -134,5 +129,18 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   touch-action: none;
+}
+
+.add-rectangle-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 </style>
