@@ -40,7 +40,7 @@ const imageStore = useImageStore()
 const images = computed(() => imageStore.getImages)
 
 const showPopup = ref(false)
-const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: 'src/assets/photography/11.png' })
+const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: 'public/photography/11.png' })
 
 const updateSize = () => {
   if (container.value) {
