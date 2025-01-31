@@ -3,7 +3,7 @@
     ref="container"
     class="map-wrapper"
     @mousedown="onMouseDown"
-    @contextmenu.prevent
+    @contextmenu.prevent="onRightClick"
     @dragover.prevent
     @drop="onDrop"
   >
@@ -61,6 +61,20 @@ const onMouseDown = (event: MouseEvent) => {
   if (leftClickActive && rightClickActive) {
     openPopup()
   }
+}
+
+const onRightClick = (event: MouseEvent) => {
+  event.preventDefault()
+  if (!svg.value) return
+
+  const svgElement = svg.value as SVGElement
+  const transform = d3.zoomTransform(svgElement)
+  const svgRect = svgElement.getBoundingClientRect()
+
+  newImage.value.x = (event.clientX - svgRect.left - transform.x) / transform.k
+  newImage.value.y = (event.clientY - svgRect.top - transform.y) / transform.k
+
+  showPopup.value = true
 }
 
 const openPopup = () => {
