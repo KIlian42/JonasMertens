@@ -37,6 +37,7 @@ let rightClickActive = false
 let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const imageStore = useImageStore()
+imageStore.loadImagesFromGitHub()
 const images = computed(() => imageStore.getImages)
 
 const showPopup = ref(false)
