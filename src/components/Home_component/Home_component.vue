@@ -16,7 +16,18 @@
         <label>Y: <input v-model.number="newImage.y" type="number" /></label>
         <label>Width: <input v-model.number="newImage.width" type="number" /></label>
         <label>Height: <input v-model.number="newImage.height" type="number" /></label>
-        <label>Image File: <input type="file" @change="onFileChange" /></label>
+        <label v-if="!selectedFile">
+          Image File:
+          <input type="file" ref="fileInput" @change="onFileChange" />
+        </label>
+        <p v-if="selectedFile">Selected File: {{ selectedFile.name }}</p>
+        <div v-if="newImage.src">
+          <img
+            :src="newImage.src"
+            alt="Preview"
+            style="max-width: 100%; max-height: 200px; margin-top: 10px"
+          />
+        </div>
         <button @click="addImage">OK</button>
         <button @click="closePopup">Cancel</button>
       </div>
@@ -31,6 +42,7 @@ import * as d3 from 'd3'
 
 const container = ref<HTMLDivElement | null>(null)
 const svg = ref<SVGElement | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 const width = ref(0)
 const height = ref(0)
 let leftClickActive = false
@@ -99,12 +111,15 @@ const openPopup = () => {
 
 const closePopup = () => {
   showPopup.value = false
+  selectedFile.value = null
+  newImage.value.src = ''
 }
 
 const onFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     selectedFile.value = target.files[0]
+    newImage.value.src = URL.createObjectURL(selectedFile.value)
   }
 }
 
@@ -114,10 +129,10 @@ const addImage = async () => {
     const reader = new FileReader()
 
     reader.onload = async (e) => {
-      const base64String = e.target?.result as string
+      const base64String = (e.target?.result as string).split(',')[1]
       await imageStore.addImage({
         ...newImage.value,
-        src: base64String, // Direkt die Data-URL (inklusive Base64) übergeben
+        src: newImage.value.src,
         name: imageName,
       })
       renderImages()
@@ -130,7 +145,7 @@ const addImage = async () => {
 
 const onDrop = async (event: DragEvent) => {
   event.preventDefault()
-  if (!event.clientX || !event.clientY || !svg.value) return
+  if (!event.clientX || !event.clientY || !svg.value || !event.dataTransfer?.files.length) return
 
   const svgElement = svg.value as SVGElement
   const transform = d3.zoomTransform(svgElement)
@@ -139,8 +154,16 @@ const onDrop = async (event: DragEvent) => {
   const x = (event.clientX - svgRect.left - transform.x) / transform.k
   const y = (event.clientY - svgRect.top - transform.y) / transform.k
 
-  await imageStore.addImage({ x, y, width: 100, height: 100, src: '/2.png' })
-  renderImages()
+  selectedFile.value = event.dataTransfer.files[0]
+  newImage.value = {
+    x,
+    y,
+    width: 100,
+    height: 100,
+    src: URL.createObjectURL(selectedFile.value),
+  }
+
+  showPopup.value = true
 }
 
 const renderImages = () => {
