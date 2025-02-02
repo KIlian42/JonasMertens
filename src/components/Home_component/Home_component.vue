@@ -1,6 +1,5 @@
 <template>
   <div
-    ref="container"
     class="map-wrapper"
     @mousedown="onMouseDown"
     @contextmenu.prevent="onRightClick"
@@ -191,16 +190,20 @@ const initView = (ref: SVGElement | null) => {
 
   const zoom = d3
     .zoom<SVGElement, unknown>()
-    .scaleExtent([0.01, 1000])
+    .scaleExtent([0.01, 1000]) // Min- und Max-Zoom
     .on('zoom', onZoom)
-    .filter((event: any) => {
-      return !(event.type === 'wheel' && event.ctrlKey)
-    })
+    .filter((event: any) => !(event.type === 'wheel' && event.ctrlKey))
 
   svg.call(zoom)
 
-  const centered = d3.zoomIdentity.translate(width.value / 2, height.value / 2)
-  svg.call(zoom.transform, centered)
+  // Initial View (Zoom und Position)
+  const initialZoomLevel = 1.1 // Zoom 150%
+  const initialX = 850 // 100px nach rechts verschoben
+  const initialY = 350 // 50px nach unten verschoben
+
+  const initialView = d3.zoomIdentity.translate(initialX, initialY).scale(initialZoomLevel)
+
+  svg.call(zoom.transform, initialView)
 }
 
 onMounted(() => {
@@ -231,6 +234,7 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 0;
   left: 0;
+  overflow: hidden;
 }
 
 .map-container {
@@ -256,6 +260,7 @@ onBeforeUnmount(() => {
 
 .add-image-button:hover {
   transform: scale(1.05);
+  background-color: lightcyan;
 }
 
 .popup {
