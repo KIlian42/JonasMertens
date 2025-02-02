@@ -64,10 +64,17 @@ export const useImageStore = defineStore('image', {
 
       try {
         const imageName = image.name || `image_${Date.now()}.png`
-        const imageBase64 = await this.convertImageToBase64(image.src)
+
+        // Falls src eine Data-URL ist, extrahiere Base64 direkt
+        let imageBase64 = ''
+        if (image.src.startsWith('data:')) {
+          imageBase64 = image.src.split(',')[1]
+        } else {
+          imageBase64 = await this.convertImageToBase64(image.src)
+        }
 
         // 1. Bild in GitHub hochladen
-        const imageUploadResponse = await axios.put(
+        await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${IMAGES_FOLDER_PATH}${imageName}`,
           {
             message: `Add image ${imageName}`,
@@ -82,7 +89,7 @@ export const useImageStore = defineStore('image', {
           },
         )
 
-        const uploadedImageUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/refs/heads/${BRANCH}/${IMAGES_FOLDER_PATH}${imageName}`
+        const uploadedImageUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}/${IMAGES_FOLDER_PATH}${imageName}`
 
         // 2. settings.json aktualisieren
         const settingsResponse = await axios.get(
@@ -129,11 +136,10 @@ export const useImageStore = defineStore('image', {
           },
         )
 
-        // 3. Neues Bild lokal speichern
         this.images.push(newImage)
-      } catch (error) {
-        console.error('Fehler beim Hochladen des Bildes:', error)
-        this.error = 'Fehler beim Hochladen des Bildes.'
+      } catch (error: any) {
+        console.error('Fehler beim Hochladen des Bildes:', error.response?.data || error.message)
+        this.error = `Fehler: ${error.response?.data?.message || 'Unbekannter Fehler'}`
       }
     },
 

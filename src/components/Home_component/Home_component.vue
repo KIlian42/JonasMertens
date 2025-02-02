@@ -16,6 +16,7 @@
         <label>Y: <input v-model.number="newImage.y" type="number" /></label>
         <label>Width: <input v-model.number="newImage.width" type="number" /></label>
         <label>Height: <input v-model.number="newImage.height" type="number" /></label>
+        <label>Image File: <input type="file" @change="onFileChange" /></label>
         <button @click="addImage">OK</button>
         <button @click="closePopup">Cancel</button>
       </div>
@@ -38,7 +39,6 @@ let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const imageStore = useImageStore()
 
-// Bilder laden und den Ladezustand überwachen
 const isLoading = ref(true)
 const images = computed(() => imageStore.getImages)
 
@@ -48,7 +48,6 @@ const loadImages = async () => {
 }
 loadImages()
 
-// Watcher für den Ladezustand der Bilder
 watch(isLoading, (newValue) => {
   if (!newValue) {
     renderImages()
@@ -56,7 +55,8 @@ watch(isLoading, (newValue) => {
 })
 
 const showPopup = ref(false)
-const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: '/2.png' })
+const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: '' })
+const selectedFile = ref<File | null>(null)
 
 const updateSize = () => {
   if (container.value) {
@@ -101,10 +101,31 @@ const closePopup = () => {
   showPopup.value = false
 }
 
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    selectedFile.value = target.files[0]
+  }
+}
+
 const addImage = async () => {
-  await imageStore.addImage({ ...newImage.value })
-  renderImages()
-  closePopup()
+  if (selectedFile.value) {
+    const imageName = `image_${Date.now()}.${selectedFile.value.name.split('.').pop()}`
+    const reader = new FileReader()
+
+    reader.onload = async (e) => {
+      const base64String = e.target?.result as string
+      await imageStore.addImage({
+        ...newImage.value,
+        src: base64String, // Direkt die Data-URL (inklusive Base64) übergeben
+        name: imageName,
+      })
+      renderImages()
+      closePopup()
+    }
+
+    reader.readAsDataURL(selectedFile.value)
+  }
 }
 
 const onDrop = async (event: DragEvent) => {
