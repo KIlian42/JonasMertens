@@ -8,7 +8,7 @@
       </RouterLink>
       <RouterLink to="/contact">
         <btn>
-          <h2 class="extra-bold">Contact</h2>
+          <h2 class="extra-bold">Kontakt</h2>
         </btn>
       </RouterLink>
     </div>
@@ -20,7 +20,7 @@
       </RouterLink>
       <RouterLink to="/contact">
         <btn>
-          <h2 class="extra-bold">Contact</h2>
+          <h2 class="extra-bold">Kontakt</h2>
         </btn>
       </RouterLink>
     </div>
