@@ -1,7 +1,7 @@
 .mainphone {
   position: relative;
   width: 100vw;
-  height: 100svh;
+  height: 100vh;
   padding-top: 70px;
   overflow: auto;
 }
