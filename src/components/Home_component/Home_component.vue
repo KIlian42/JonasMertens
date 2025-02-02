@@ -256,11 +256,12 @@ onBeforeUnmount(() => {
   justify-content: center;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6); /* Optionaler Schatten für bessere Sichtbarkeit */
   cursor: pointer;
+  background-color: white;
 }
 
 .add-image-button:hover {
   transform: scale(1.05);
-  background-color: lightcyan;
+  background-color: #fbbe0e;
 }
 
 .popup {
