@@ -79,9 +79,9 @@
               </v-col>
             </v-row>
 
-            <div v-if="newImage.src" class="image-preview">
+            <!-- <div v-if="newImage.src" class="image-preview">
               <img :src="newImage.src" alt="Vorschau" :style="{ objectFit: newImage.objectFit }" />
-            </div>
+            </div> -->
           </v-container>
         </v-card-text>
 
@@ -127,7 +127,17 @@ watch(isLoading, (newValue) => {
 })
 
 const showPopup = ref(false)
-const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: '' })
+const newImage = ref({
+  x: 0,
+  y: 0,
+  width: 100,
+  height: 100,
+  radius: 0,
+  zIndex: 1,
+  objectFit: 'cover',
+  description: '',
+  src: '',
+})
 const selectedFile = ref<File | null>(null)
 
 const updateSize = () => {
@@ -220,6 +230,10 @@ const onDrop = async (event: DragEvent) => {
     y,
     width: 100,
     height: 100,
+    radius: 0,
+    zIndex: 1,
+    objectFit: 'cover',
+    description: '',
     src: URL.createObjectURL(selectedFile.value),
   }
 
