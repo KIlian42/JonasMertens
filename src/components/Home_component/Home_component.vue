@@ -189,7 +189,7 @@ const initView = (ref: SVGElement | null) => {
 
   const zoom = d3
     .zoom<SVGElement, unknown>()
-    .scaleExtent([0.166, 30])
+    .scaleExtent([0.01, 1000])
     .on('zoom', onZoom)
     .filter((event: any) => {
       return !(event.type === 'wheel' && event.ctrlKey)
