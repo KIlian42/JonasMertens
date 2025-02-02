@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onBeforeUnmount, nextTick, computed } from 'vue'
+import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
 import * as d3 from 'd3'
 
@@ -37,8 +37,23 @@ let rightClickActive = false
 let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const imageStore = useImageStore()
-imageStore.loadImagesFromGitHub()
+
+// Bilder laden und den Ladezustand überwachen
+const isLoading = ref(true)
 const images = computed(() => imageStore.getImages)
+
+const loadImages = async () => {
+  await imageStore.loadImagesFromGitHub()
+  isLoading.value = false
+}
+loadImages()
+
+// Watcher für den Ladezustand der Bilder
+watch(isLoading, (newValue) => {
+  if (!newValue) {
+    renderImages()
+  }
+})
 
 const showPopup = ref(false)
 const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: '/11.png' })
@@ -103,11 +118,12 @@ const onDrop = (event: DragEvent) => {
   const x = (event.clientX - svgRect.left - transform.x) / transform.k
   const y = (event.clientY - svgRect.top - transform.y) / transform.k
 
-  imageStore.addImage({ x, y, width: 100, height: 100 })
+  imageStore.addImage({ x, y, width: 100, height: 100, src: '/default.png' }) // src hinzugefügt
   renderImages()
 }
 
 const renderImages = () => {
+  if (!mainContainer) return
   mainContainer.selectAll('image').remove()
   images.value.forEach((img) => {
     mainContainer
@@ -126,8 +142,6 @@ const initView = (ref: SVGElement | null) => {
 
   const svg = d3.select(ref)
   mainContainer = svg.append('g').classed('container', true)
-
-  renderImages()
 
   const zoom = d3
     .zoom<SVGElement, unknown>()
