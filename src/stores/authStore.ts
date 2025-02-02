@@ -1,9 +1,11 @@
+// authStore.ts
+
 import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     username: 'berlin',
-    password: 'coconut',
+    password: '',
     loggedIn: false,
   }),
   getters: {
@@ -15,6 +17,9 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     setLoginStatus(status: boolean) {
       this.loggedIn = status
+    },
+    setPassword(password: string) {
+      this.password = password
     },
   },
 })

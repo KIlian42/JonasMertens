@@ -56,7 +56,7 @@ watch(isLoading, (newValue) => {
 })
 
 const showPopup = ref(false)
-const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: '/11.png' })
+const newImage = ref({ x: 0, y: 0, width: 100, height: 100, src: '/2.png' })
 
 const updateSize = () => {
   if (container.value) {
@@ -101,13 +101,13 @@ const closePopup = () => {
   showPopup.value = false
 }
 
-const addImage = () => {
-  imageStore.addImage({ ...newImage.value })
+const addImage = async () => {
+  await imageStore.addImage({ ...newImage.value })
   renderImages()
   closePopup()
 }
 
-const onDrop = (event: DragEvent) => {
+const onDrop = async (event: DragEvent) => {
   event.preventDefault()
   if (!event.clientX || !event.clientY || !svg.value) return
 
@@ -118,7 +118,7 @@ const onDrop = (event: DragEvent) => {
   const x = (event.clientX - svgRect.left - transform.x) / transform.k
   const y = (event.clientY - svgRect.top - transform.y) / transform.k
 
-  imageStore.addImage({ x, y, width: 100, height: 100, src: '/default.png' }) // src hinzugefügt
+  await imageStore.addImage({ x, y, width: 100, height: 100, src: '/2.png' })
   renderImages()
 }
 

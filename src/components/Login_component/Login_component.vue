@@ -21,7 +21,7 @@
           <v-text-field
             v-model="username"
             label="Benutzername"
-            type="username"
+            type="text"
             outlined
             dense
             class="mb-4"
@@ -63,10 +63,19 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const login = () => {
-  if (authStore.isValidLogin(username.value, password.value)) {
-    loginErrorMessage.value = false
-    authStore.setLoginStatus(true)
-    router.push('/')
+  if (username.value === 'berlin') {
+    authStore.setPassword(password.value)
+    if (authStore.isValidLogin(username.value, password.value)) {
+      loginErrorMessage.value = false
+      authStore.setLoginStatus(true)
+      router.push('/')
+    } else {
+      loginErrorMessage.value = true
+      loginErrorAnimation.value = true
+      setTimeout(() => {
+        loginErrorAnimation.value = false
+      }, 1000)
+    }
   } else {
     loginErrorMessage.value = true
     loginErrorAnimation.value = true
@@ -75,8 +84,10 @@ const login = () => {
     }, 1000)
   }
 }
+
 const logout = () => {
   authStore.setLoginStatus(false)
+  password.value = ''
 }
 </script>
 
