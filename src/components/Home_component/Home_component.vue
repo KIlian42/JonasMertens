@@ -8,7 +8,9 @@
     @drop="onDrop"
   >
     <svg ref="svg" class="map-container"></svg>
-    <button class="add-image-button" @click="openPopup">+</button>
+    <btn icon class="add-image-button" @click="openPopup">
+      <v-icon size="62">mdi-plus-circle</v-icon>
+    </btn>
 
     <div v-if="showPopup" class="popup">
       <div class="popup-content">
@@ -232,23 +234,28 @@ onBeforeUnmount(() => {
 }
 
 .map-container {
-  background-color: #ccc;
+  background: linear-gradient(to bottom, #fff 98%, #e6e6e6);
   width: 100%;
   height: 100%;
   touch-action: none;
 }
-
 .add-image-button {
+  width: 50px;
+  height: 50px;
   position: absolute;
   bottom: 20px;
   right: 20px;
-  background-color: blue;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 20px;
+  color: #10142f;
+  border-radius: 50%; /* Kreisförmiger Button */
+  display: flex; /* Icon-Zentrierung */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6); /* Optionaler Schatten für bessere Sichtbarkeit */
   cursor: pointer;
-  border-radius: 5px;
+}
+
+.add-image-button:hover {
+  transform: scale(1.05);
 }
 
 .popup {
