@@ -197,9 +197,16 @@ const initView = (ref: SVGElement | null) => {
   svg.call(zoom)
 
   // Initial View (Zoom und Position)
-  const initialZoomLevel = 1.1 // Zoom 150%
-  const initialX = 850 // 100px nach rechts verschoben
-  const initialY = 350 // 50px nach unten verschoben
+  let initialZoomLevel = 1.1 // Zoom 150%
+  let initialX = 810 // Standardposition
+  let initialY = 350 // 50px nach unten verschoben
+
+  // Anpassung der X-Position bei kleineren Bildschirmen
+  if (window.innerWidth < 1200) {
+    initialZoomLevel = 0.41
+    initialX -= 635
+    initialY += 20
+  }
 
   const initialView = d3.zoomIdentity.translate(initialX, initialY).scale(initialZoomLevel)
 
