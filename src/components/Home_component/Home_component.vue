@@ -11,28 +11,87 @@
       <v-icon size="62">mdi-plus-circle</v-icon>
     </btn>
 
-    <div v-if="showPopup" class="popup">
-      <div class="popup-content">
-        <label>X: <input v-model.number="newImage.x" type="number" /></label>
-        <label>Y: <input v-model.number="newImage.y" type="number" /></label>
-        <label>Width: <input v-model.number="newImage.width" type="number" /></label>
-        <label>Height: <input v-model.number="newImage.height" type="number" /></label>
-        <label v-if="!selectedFile">
-          Image File:
-          <input type="file" ref="fileInput" @change="onFileChange" />
-        </label>
-        <p v-if="selectedFile">Selected File: {{ selectedFile.name }}</p>
-        <div v-if="newImage.src">
-          <img
-            :src="newImage.src"
-            alt="Preview"
-            style="max-width: 100%; max-height: 200px; margin-top: 10px"
-          />
-        </div>
-        <button @click="addImage">OK</button>
-        <button @click="closePopup">Cancel</button>
-      </div>
-    </div>
+    <v-dialog v-model="showPopup" max-width="800">
+      <v-card class="popup-card">
+        <v-card-title class="text-h6">Bild hinzufügen</v-card-title>
+        <v-card-text>
+          <v-container fluid>
+            <v-file-input label="Bilddatei" @change="onFileChange" outlined dense></v-file-input>
+            <v-row>
+              <v-col cols="6">
+                <v-text-field
+                  v-model.number="newImage.x"
+                  label="X-Position"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-text-field
+                  v-model.number="newImage.width"
+                  label="Breite"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-text-field
+                  v-model.number="newImage.radius"
+                  label="Gerundete Ecken"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-select
+                  v-model="newImage.objectFit"
+                  :items="['fill', 'contain', 'cover']"
+                  label="Fit-Option"
+                  outlined
+                  dense
+                ></v-select>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model.number="newImage.y"
+                  label="Y-Position"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-text-field
+                  v-model.number="newImage.height"
+                  label="Höhe"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-text-field
+                  v-model.number="newImage.zIndex"
+                  label="Hierarchie Position"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-text-field
+                  v-model="newImage.description"
+                  label="Bildbeschreibung"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <div v-if="newImage.src" class="image-preview">
+              <img :src="newImage.src" alt="Vorschau" :style="{ objectFit: newImage.objectFit }" />
+            </div>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="#333333" @click="addImage">OK</v-btn>
+          <v-btn color="#333333" @click="closePopup">Abbrechen</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
