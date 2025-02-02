@@ -12,7 +12,7 @@
   text-align: left;
 }
 
-@media (min-width: 1101px) {
+@media (min-width: 1151px) {
   .textbox {
     padding-left: 30%;
   }
