@@ -20,6 +20,11 @@ export const useImageStore = defineStore('image', {
       width: number
       height: number
       src: string
+      rounded: string
+      zIndex: number
+      objectFit: string
+      title: string
+      description: string
     }>,
     loading: false,
     error: null as string | null,

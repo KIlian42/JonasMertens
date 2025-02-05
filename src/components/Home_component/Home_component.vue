@@ -13,10 +13,17 @@
 
     <v-dialog v-model="showPopup" max-width="800">
       <v-card class="popup-card">
-        <v-card-title class="text-h6">Bild hinzufügen</v-card-title>
+        <v-card-title v-if="editImage === false" class="text-h6">Bild hinzufügen</v-card-title>
+        <v-card-title v-else class="text-h6">Bild bearbeiten</v-card-title>
         <v-card-text>
           <v-container fluid>
-            <v-file-input label="Bilddatei" @change="onFileChange" outlined dense></v-file-input>
+            <v-file-input
+              v-if="editImage === false"
+              label="Bilddatei"
+              @change="onFileChange"
+              outlined
+              dense
+            ></v-file-input>
             <v-row>
               <v-col cols="6">
                 <v-text-field
@@ -127,12 +134,13 @@ watch(isLoading, (newValue) => {
 })
 
 const showPopup = ref(false)
+const editImage = ref(false)
 const newImage = ref({
   x: 0,
   y: 0,
   width: 100,
   height: 100,
-  radius: 0,
+  rounded: '0px',
   zIndex: 1,
   objectFit: 'cover',
   description: '',
@@ -183,6 +191,7 @@ const closePopup = () => {
   showPopup.value = false
   selectedFile.value = null
   newImage.value.src = ''
+  editImage.value = false
 }
 
 const onFileChange = (event: Event) => {
@@ -230,7 +239,7 @@ const onDrop = async (event: DragEvent) => {
     y,
     width: 100,
     height: 100,
-    radius: 0,
+    rounded: '0px',
     zIndex: 1,
     objectFit: 'cover',
     description: '',
@@ -245,22 +254,19 @@ const renderImages = () => {
   mainContainer.selectAll('g.image-group').remove()
 
   images.value.forEach((img) => {
-    // Gruppe erstellen für Bild + Rahmen
     const group = mainContainer.append('g').attr('class', 'image-group')
 
-    // Rahmen (zuerst unsichtbar)
     const border = group
       .append('rect')
       .attr('x', img.x)
       .attr('y', img.y)
       .attr('width', img.width)
       .attr('height', img.height)
-      .attr('fill', 'none') // Kein Füllbereich
-      .attr('stroke', '#171937') // Rahmenfarbe
-      .attr('stroke-width', 4) // Dicke des Rahmens
-      .style('opacity', 0) // Unsichtbar standardmäßig
+      .attr('fill', 'none')
+      .attr('stroke', '#171937')
+      .attr('stroke-width', 4)
+      .style('opacity', 0)
 
-    // Bild hinzufügen
     const imageElement = group
       .append('image')
       .attr('x', img.x)
@@ -268,16 +274,30 @@ const renderImages = () => {
       .attr('width', img.width)
       .attr('height', img.height)
       .attr('href', img.src)
-      .style('cursor', 'pointer') // Zeigt an, dass es interaktiv ist
+      .attr('alt', img.description)
+      .style('cursor', 'pointer')
       .on('mouseover', function () {
-        border.style('opacity', 1) // Rahmen sichtbar machen
+        border.style('opacity', 1)
       })
       .on('mouseout', function () {
-        border.style('opacity', 0) // Rahmen wieder ausblenden
+        border.style('opacity', 0)
       })
       .on('click', function () {
-        // Alert beim Klicken des Bildes
+        // alert(`Bild angeklickt: ${img.description}`)
+        newImage.value = {
+          x: img.x,
+          y: img.y,
+          width: img.width,
+          height: img.height,
+          rounded: img.rounded,
+          zIndex: img.zIndex,
+          objectFit: img.objectFit,
+          description: img.description,
+          src: img.src,
+        }
+
         showPopup.value = true
+        editImage.value = true
       })
   })
 }
