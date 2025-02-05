@@ -242,16 +242,43 @@ const onDrop = async (event: DragEvent) => {
 
 const renderImages = () => {
   if (!mainContainer) return
-  mainContainer.selectAll('image').remove()
+  mainContainer.selectAll('g.image-group').remove()
+
   images.value.forEach((img) => {
-    mainContainer
+    // Gruppe erstellen für Bild + Rahmen
+    const group = mainContainer.append('g').attr('class', 'image-group')
+
+    // Rahmen (zuerst unsichtbar)
+    const border = group
+      .append('rect')
+      .attr('x', img.x)
+      .attr('y', img.y)
+      .attr('width', img.width)
+      .attr('height', img.height)
+      .attr('fill', 'none') // Kein Füllbereich
+      .attr('stroke', '#171937') // Rahmenfarbe
+      .attr('stroke-width', 4) // Dicke des Rahmens
+      .style('opacity', 0) // Unsichtbar standardmäßig
+
+    // Bild hinzufügen
+    const imageElement = group
       .append('image')
       .attr('x', img.x)
       .attr('y', img.y)
       .attr('width', img.width)
       .attr('height', img.height)
       .attr('href', img.src)
-      .style('object-fit', 'cover')
+      .style('cursor', 'pointer') // Zeigt an, dass es interaktiv ist
+      .on('mouseover', function () {
+        border.style('opacity', 1) // Rahmen sichtbar machen
+      })
+      .on('mouseout', function () {
+        border.style('opacity', 0) // Rahmen wieder ausblenden
+      })
+      .on('click', function () {
+        // Alert beim Klicken des Bildes
+        showPopup.value = true
+      })
   })
 }
 
