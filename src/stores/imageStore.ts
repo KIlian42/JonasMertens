@@ -63,6 +63,11 @@ export const useImageStore = defineStore('image', {
       height: number
       src: string
       name?: string
+      rounded: string
+      zIndex: number
+      objectFit: string
+      title: string
+      description: string
     }) {
       const authStore = useAuthStore()
       const GITHUB_PAT = authStore.password // PAT aus authStore
@@ -121,6 +126,11 @@ export const useImageStore = defineStore('image', {
           y: image.y,
           width: image.width,
           height: image.height,
+          rounded: image.rounded,
+          zIndex: image.zIndex,
+          objectFit: image.objectFit,
+          title: image.title,
+          description: image.description,
         }
 
         currentSettings.images.push(newImage)

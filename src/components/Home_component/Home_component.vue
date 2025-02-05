@@ -143,6 +143,7 @@ const newImage = ref({
   rounded: '0px',
   zIndex: 1,
   objectFit: 'cover',
+  title: '',
   description: '',
   src: '',
 })
@@ -242,6 +243,7 @@ const onDrop = async (event: DragEvent) => {
     rounded: '0px',
     zIndex: 1,
     objectFit: 'cover',
+    title: '',
     description: '',
     src: URL.createObjectURL(selectedFile.value),
   }
@@ -292,6 +294,7 @@ const renderImages = () => {
           rounded: img.rounded,
           zIndex: img.zIndex,
           objectFit: img.objectFit,
+          title: img.title,
           description: img.description,
           src: img.src,
         }
