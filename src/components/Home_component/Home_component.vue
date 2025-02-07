@@ -7,7 +7,7 @@
     @drop="onDrop"
   >
     <svg ref="svg" class="map-container"></svg>
-    <btn icon class="add-image-button" @click="openPopup">
+    <btn v-if="loggedIn" icon class="add-image-button" @click="openPopup">
       <v-icon size="62">mdi-plus-circle</v-icon>
     </btn>
 
@@ -87,9 +87,9 @@
               </v-col>
             </v-row>
 
-            <!-- <div v-if="newImage.src" class="image-preview">
+            <div v-if="newImage.src" class="image-preview">
               <img :src="newImage.src" alt="Vorschau" :style="{ objectFit: newImage.objectFit }" />
-            </div> -->
+            </div>
           </v-container>
         </v-card-text>
 
@@ -108,6 +108,7 @@
 <script setup lang="ts">
 import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
+import { useAuthStore } from '@/stores/authStore'
 import * as d3 from 'd3'
 
 const container = ref<HTMLDivElement | null>(null)
@@ -120,6 +121,9 @@ let rightClickActive = false
 let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const imageStore = useImageStore()
+const authStore = useAuthStore()
+
+const loggedIn = authStore.loggedIn
 
 const isLoading = ref(true)
 const images = computed(() => imageStore.getImages)
@@ -167,6 +171,7 @@ const onZoom = (event: d3.D3ZoomEvent<SVGElement, unknown>) => {
 }
 
 const onMouseDown = (event: MouseEvent) => {
+  if (!loggedIn) return
   if (event.button === 0) leftClickActive = true
   if (event.button === 2) rightClickActive = true
 
@@ -176,6 +181,7 @@ const onMouseDown = (event: MouseEvent) => {
 }
 
 const onRightClick = (event: MouseEvent) => {
+  if (!loggedIn) return
   event.preventDefault()
   if (!svg.value) return
 
@@ -273,6 +279,7 @@ const deleteImage = async () => {
 }
 
 const onDrop = async (event: DragEvent) => {
+  if (!loggedIn) return
   event.preventDefault()
   if (!event.clientX || !event.clientY || !svg.value || !event.dataTransfer?.files.length) return
 
