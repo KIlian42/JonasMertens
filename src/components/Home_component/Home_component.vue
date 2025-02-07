@@ -41,9 +41,15 @@
                   dense
                 ></v-text-field>
                 <v-text-field
-                  v-model.number="newImage.radius"
+                  v-model.number="newImage.border_radius"
                   label="Gerundete Ecken"
                   type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+                <v-text-field
+                  v-model="newImage.description"
+                  label="Titel"
                   outlined
                   dense
                 ></v-text-field>
@@ -71,7 +77,7 @@
                   dense
                 ></v-text-field>
                 <v-text-field
-                  v-model.number="newImage.zIndex"
+                  v-model.number="newImage.z_index"
                   label="Hierarchie Position"
                   type="number"
                   outlined
@@ -136,16 +142,16 @@ watch(isLoading, (newValue) => {
 const showPopup = ref(false)
 const editImage = ref(false)
 const newImage = ref({
+  src: '',
   x: 0,
   y: 0,
   width: 100,
   height: 100,
-  rounded: '0px',
-  zIndex: 1,
+  border_radius: 0,
+  z_index: 1,
   objectFit: 'cover',
   title: '',
   description: '',
-  src: '',
 })
 const selectedFile = ref<File | null>(null)
 
@@ -236,16 +242,16 @@ const onDrop = async (event: DragEvent) => {
 
   selectedFile.value = event.dataTransfer.files[0]
   newImage.value = {
+    src: URL.createObjectURL(selectedFile.value),
     x,
     y,
     width: 100,
     height: 100,
-    rounded: '0px',
-    zIndex: 1,
+    border_radius: 0,
+    z_index: 1,
     objectFit: 'cover',
     title: '',
     description: '',
-    src: URL.createObjectURL(selectedFile.value),
   }
 
   showPopup.value = true
@@ -255,20 +261,38 @@ const renderImages = () => {
   if (!mainContainer) return
   mainContainer.selectAll('g.image-group').remove()
 
-  images.value.forEach((img) => {
+  images.value.forEach((img, index) => {
     const group = mainContainer.append('g').attr('class', 'image-group')
 
+    // Definiere das Clip-Path
+    const clipPathId = `clip-path-${index}`
+    mainContainer
+      .append('defs')
+      .append('clipPath')
+      .attr('id', clipPathId)
+      .append('rect')
+      .attr('x', img.x)
+      .attr('y', img.y)
+      .attr('width', img.width)
+      .attr('height', img.height)
+      .attr('rx', img.border_radius ?? 20) // Radius für Abrundung
+      .attr('ry', img.border_radius ?? 20)
+
+    // Rahmen
     const border = group
       .append('rect')
       .attr('x', img.x)
       .attr('y', img.y)
       .attr('width', img.width)
       .attr('height', img.height)
+      .attr('rx', img.border_radius ?? 20)
+      .attr('ry', img.border_radius ?? 20)
       .attr('fill', 'none')
       .attr('stroke', '#171937')
       .attr('stroke-width', 4)
       .style('opacity', 0)
 
+    // Bild mit Clip-Path
     const imageElement = group
       .append('image')
       .attr('x', img.x)
@@ -277,6 +301,8 @@ const renderImages = () => {
       .attr('height', img.height)
       .attr('href', img.src)
       .attr('alt', img.description)
+      .attr('preserveAspectRatio', 'none') // Objekt soll den Bereich füllen
+      .attr('clip-path', `url(#${clipPathId})`) // Clip-Path für Abrundung
       .style('cursor', 'pointer')
       .on('mouseover', function () {
         border.style('opacity', 1)
@@ -285,14 +311,13 @@ const renderImages = () => {
         border.style('opacity', 0)
       })
       .on('click', function () {
-        // alert(`Bild angeklickt: ${img.description}`)
         newImage.value = {
           x: img.x,
           y: img.y,
           width: img.width,
           height: img.height,
-          rounded: img.rounded,
-          zIndex: img.zIndex,
+          border_radius: img.border_radius,
+          z_index: img.z_index,
           objectFit: img.objectFit,
           title: img.title,
           description: img.description,

@@ -15,13 +15,13 @@ export const useImageStore = defineStore('image', {
     images: [] as Array<{
       id?: number
       name?: string
+      src: string
       x: number
       y: number
       width: number
       height: number
-      src: string
-      rounded: string
-      zIndex: number
+      border_radius: number
+      z_index: number
       objectFit: string
       title: string
       description: string
@@ -57,14 +57,15 @@ export const useImageStore = defineStore('image', {
     },
 
     async addImage(image: {
+      id?: number
+      name?: string
+      src: string
       x: number
       y: number
       width: number
       height: number
-      src: string
-      name?: string
-      rounded: string
-      zIndex: number
+      border_radius: number
+      z_index: number
       objectFit: string
       title: string
       description: string
@@ -126,8 +127,8 @@ export const useImageStore = defineStore('image', {
           y: image.y,
           width: image.width,
           height: image.height,
-          rounded: image.rounded,
-          zIndex: image.zIndex,
+          border_radius: image.border_radius,
+          z_index: image.z_index,
           objectFit: image.objectFit,
           title: image.title,
           description: image.description,
