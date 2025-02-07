@@ -226,6 +226,60 @@ export const useImageStore = defineStore('image', {
       }
     },
 
+    async deleteImage(id: number) {
+      const authStore = useAuthStore()
+      const GITHUB_PAT = authStore.password
+
+      try {
+        // Lade aktuelle settings.json
+        const settingsResponse = await axios.get(
+          `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
+          {
+            headers: {
+              Authorization: `token ${GITHUB_PAT}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          },
+        )
+
+        const sha = settingsResponse.data.sha
+        const currentSettings = JSON.parse(atob(settingsResponse.data.content))
+
+        const imageIndex = currentSettings.images.findIndex((img: any) => img.id === id)
+        if (imageIndex === -1) {
+          throw new Error('Bild nicht gefunden.')
+        }
+
+        // Aktualisiere die Eigenschaften des Bildes
+        Object.assign(currentSettings.images[imageIndex], null)
+
+        await axios.put(
+          `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
+          {
+            message: `Update settings.json for image ID ${id}`,
+            content: btoa(JSON.stringify(currentSettings, null, 2)),
+            sha,
+            branch: BRANCH,
+          },
+          {
+            headers: {
+              Authorization: `token ${GITHUB_PAT}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          },
+        )
+
+        // Lokale Aktualisierung
+        const localImageIndex = this.images.findIndex((img) => img.id === updatedImage.id)
+        if (localImageIndex !== -1) {
+          Object.assign(this.images[localImageIndex], updatedImage)
+        }
+      } catch (error: any) {
+        console.error('Fehler beim Bearbeiten des Bildes:', error.response?.data || error.message)
+        this.error = `Fehler: ${error.response?.data?.message || 'Unbekannter Fehler'}`
+      }
+    },
+
     async convertImageToBase64(imageUrl: string): Promise<string> {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()

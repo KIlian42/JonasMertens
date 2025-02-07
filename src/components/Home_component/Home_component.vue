@@ -94,7 +94,7 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-btn color="#333333" @click="editImage" v-if="editImageCheck">Löschen</v-btn>
+          <v-btn color="#333333" @click="deleteImage" v-if="editImageCheck">Löschen</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="#333333" @click="editImage" v-if="editImageCheck">OK</v-btn>
           <v-btn color="#333333" @click="addImage" v-else>OK</v-btn>
@@ -139,6 +139,8 @@ watch(isLoading, (newValue) => {
 const showPopup = ref(false)
 const editImageCheck = ref(false)
 const newImage = ref({
+  id: 0,
+  name: '',
   src: '',
   x: 0,
   y: 0,
@@ -197,6 +199,8 @@ const closePopup = () => {
   newImage.value.src = ''
   editImageCheck.value = false
   newImage.value = {
+    id: 0,
+    name: '',
     src: '',
     x: 0,
     y: 0,
@@ -240,13 +244,26 @@ const addImage = async () => {
 
 const editImage = async () => {
   if (selectedFile.value) {
-    const imageName = `image_${Date.now()}.${selectedFile.value.name.split('.').pop()}`
     const reader = new FileReader()
 
     reader.onload = async (e) => {
-      await imageStore.addImage({
+      await imageStore.editImage({
         ...newImage.value,
       })
+      renderImages()
+      closePopup()
+    }
+
+    reader.readAsDataURL(selectedFile.value)
+  }
+}
+
+const deleteImage = async () => {
+  if (selectedFile.value) {
+    const reader = new FileReader()
+
+    reader.onload = async (e) => {
+      await imageStore.deleteImage(newImage.value.id)
       renderImages()
       closePopup()
     }
@@ -268,6 +285,8 @@ const onDrop = async (event: DragEvent) => {
 
   selectedFile.value = event.dataTransfer.files[0]
   newImage.value = {
+    id: 0,
+    name: '',
     src: URL.createObjectURL(selectedFile.value),
     x,
     y,
@@ -338,6 +357,9 @@ const renderImages = () => {
       })
       .on('click', function () {
         newImage.value = {
+          id: img.id ? img.id : 0,
+          name: img.name ? img.name : '',
+          src: img.src,
           x: img.x,
           y: img.y,
           width: img.width,
@@ -347,7 +369,6 @@ const renderImages = () => {
           objectFit: img.objectFit,
           title: img.title,
           description: img.description,
-          src: img.src,
         }
 
         showPopup.value = true
@@ -409,55 +430,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-.map-wrapper {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-}
-
-.map-container {
-  background: linear-gradient(to bottom, #fff 98%, #e6e6e6);
-  width: 100%;
-  height: 100%;
-  touch-action: none;
-}
-.add-image-button {
-  width: 50px;
-  height: 50px;
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  color: #10142f;
-  border-radius: 50%; /* Kreisförmiger Button */
-  display: flex; /* Icon-Zentrierung */
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6); /* Optionaler Schatten für bessere Sichtbarkeit */
-  cursor: pointer;
-  background-color: white;
-}
-
-.add-image-button:hover {
-  transform: scale(1.05);
-  background-color: #fbbe0e;
-}
-
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-}
-
-.popup-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+@import url('./Home_component.css');
 </style>
