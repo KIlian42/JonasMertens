@@ -13,12 +13,12 @@
 
     <v-dialog v-model="showPopup" max-width="800">
       <v-card class="popup-card">
-        <v-card-title v-if="editImage === false" class="text-h6">Bild hinzufügen</v-card-title>
+        <v-card-title v-if="editImageCheck === false" class="text-h6">Bild hinzufügen</v-card-title>
         <v-card-title v-else class="text-h6">Bild bearbeiten</v-card-title>
         <v-card-text>
           <v-container fluid>
             <v-file-input
-              v-if="editImage === false"
+              v-if="editImageCheck === false"
               label="Bilddatei"
               @change="onFileChange"
               outlined
@@ -47,12 +47,7 @@
                   outlined
                   dense
                 ></v-text-field>
-                <v-text-field
-                  v-model="newImage.description"
-                  label="Titel"
-                  outlined
-                  dense
-                ></v-text-field>
+                <v-text-field v-model="newImage.title" label="Titel" outlined dense></v-text-field>
                 <v-select
                   v-model="newImage.objectFit"
                   :items="['fill', 'contain', 'cover']"
@@ -99,8 +94,10 @@
         </v-card-text>
 
         <v-card-actions>
+          <v-btn color="#333333" @click="editImage" v-if="editImageCheck">Löschen</v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="#333333" @click="addImage">OK</v-btn>
+          <v-btn color="#333333" @click="editImage" v-if="editImageCheck">OK</v-btn>
+          <v-btn color="#333333" @click="addImage" v-else>OK</v-btn>
           <v-btn color="#333333" @click="closePopup">Abbrechen</v-btn>
         </v-card-actions>
       </v-card>
@@ -140,7 +137,7 @@ watch(isLoading, (newValue) => {
 })
 
 const showPopup = ref(false)
-const editImage = ref(false)
+const editImageCheck = ref(false)
 const newImage = ref({
   src: '',
   x: 0,
@@ -149,7 +146,7 @@ const newImage = ref({
   height: 100,
   border_radius: 0,
   z_index: 1,
-  objectFit: 'cover',
+  objectFit: 'fill',
   title: '',
   description: '',
 })
@@ -198,7 +195,19 @@ const closePopup = () => {
   showPopup.value = false
   selectedFile.value = null
   newImage.value.src = ''
-  editImage.value = false
+  editImageCheck.value = false
+  newImage.value = {
+    src: '',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    border_radius: 0,
+    z_index: 1,
+    objectFit: 'fill',
+    title: '',
+    description: '',
+  }
 }
 
 const onFileChange = (event: Event) => {
@@ -229,6 +238,23 @@ const addImage = async () => {
   }
 }
 
+const editImage = async () => {
+  if (selectedFile.value) {
+    const imageName = `image_${Date.now()}.${selectedFile.value.name.split('.').pop()}`
+    const reader = new FileReader()
+
+    reader.onload = async (e) => {
+      await imageStore.addImage({
+        ...newImage.value,
+      })
+      renderImages()
+      closePopup()
+    }
+
+    reader.readAsDataURL(selectedFile.value)
+  }
+}
+
 const onDrop = async (event: DragEvent) => {
   event.preventDefault()
   if (!event.clientX || !event.clientY || !svg.value || !event.dataTransfer?.files.length) return
@@ -249,7 +275,7 @@ const onDrop = async (event: DragEvent) => {
     height: 100,
     border_radius: 0,
     z_index: 1,
-    objectFit: 'cover',
+    objectFit: 'fill',
     title: '',
     description: '',
   }
@@ -288,8 +314,8 @@ const renderImages = () => {
       .attr('rx', img.border_radius ?? 20)
       .attr('ry', img.border_radius ?? 20)
       .attr('fill', 'none')
-      .attr('stroke', '#171937')
-      .attr('stroke-width', 4)
+      .attr('stroke', 'orange')
+      .attr('stroke-width', 10)
       .style('opacity', 0)
 
     // Bild mit Clip-Path
@@ -325,7 +351,7 @@ const renderImages = () => {
         }
 
         showPopup.value = true
-        editImage.value = true
+        editImageCheck.value = true
       })
   })
 }
