@@ -31,7 +31,7 @@
             ></v-file-input>
 
             <v-row>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model.number="newImage.x"
                   label="X-Position"
@@ -40,7 +40,7 @@
                   dense
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model.number="newImage.y"
                   label="Y-Position"
@@ -50,7 +50,7 @@
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model.number="newImage.width"
                   label="Breite"
@@ -59,7 +59,7 @@
                   dense
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model.number="newImage.height"
                   label="Höhe"
@@ -68,7 +68,7 @@
                   dense
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model.number="newImage.border_radius"
                   label="Gerundete Ecken"
@@ -77,7 +77,7 @@
                   dense
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model.number="newImage.z_index"
                   label="Hierarchie Position"
@@ -86,10 +86,10 @@
                   dense
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field v-model="newImage.title" label="Titel" outlined dense></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" class="pa-0">
+              <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
                   v-model="newImage.description"
                   label="Bildbeschreibung"
@@ -97,7 +97,7 @@
                   dense
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" class="pa-0">
+              <v-col cols="12" class="pa-1">
                 <v-select
                   v-model="newImage.objectFit"
                   :items="['fill', 'contain', 'cover']"
@@ -124,7 +124,11 @@
               </v-col>
             </v-row>
 
-            <div v-if="showPreview" class="image-preview" style="overflow: scroll">
+            <div
+              v-if="showPreview"
+              class="image-preview"
+              style="overflow: scroll; scrollbar-gutter: stable; direction: rtl"
+            >
               <br />
               <img
                 v-if="newImage.src"
