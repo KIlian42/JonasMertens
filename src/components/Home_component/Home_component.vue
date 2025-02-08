@@ -7,25 +7,31 @@
     @drop="onDrop"
   >
     <svg ref="svg" class="map-container"></svg>
-    <btn v-if="loggedIn" icon class="add-image-button" @click="openPopup">
+    <btn
+      v-if="loggedIn"
+      icon
+      class="add-image-button"
+      @click="((editImageCheck = false), openPopup())"
+    >
       <v-icon size="62">mdi-plus-circle</v-icon>
     </btn>
 
     <v-dialog v-model="showPopup" max-width="800">
       <v-card class="popup-card">
-        <v-card-title v-if="editImageCheck === false" class="text-h6">Bild hinzufügen</v-card-title>
+        <v-card-title v-if="!editImageCheck" class="text-h6">Bild hinzufügen</v-card-title>
         <v-card-title v-else class="text-h6">Bild bearbeiten</v-card-title>
         <v-card-text>
           <v-container fluid>
             <v-file-input
-              v-if="editImageCheck === false"
+              v-if="!editImageCheck"
               label="Bilddatei"
               @change="onFileChange"
               outlined
               dense
             ></v-file-input>
+
             <v-row>
-              <v-col cols="6">
+              <v-col cols="12" sm="6" class="pa-0">
                 <v-text-field
                   v-model.number="newImage.x"
                   label="X-Position"
@@ -33,6 +39,18 @@
                   outlined
                   dense
                 ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-0">
+                <v-text-field
+                  v-model.number="newImage.y"
+                  label="Y-Position"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12" sm="6" class="pa-0">
                 <v-text-field
                   v-model.number="newImage.width"
                   label="Breite"
@@ -40,6 +58,17 @@
                   outlined
                   dense
                 ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-0">
+                <v-text-field
+                  v-model.number="newImage.height"
+                  label="Höhe"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-0">
                 <v-text-field
                   v-model.number="newImage.border_radius"
                   label="Gerundete Ecken"
@@ -47,7 +76,28 @@
                   outlined
                   dense
                 ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-0">
+                <v-text-field
+                  v-model.number="newImage.z_index"
+                  label="Hierarchie Position"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-0">
                 <v-text-field v-model="newImage.title" label="Titel" outlined dense></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-0">
+                <v-text-field
+                  v-model="newImage.description"
+                  label="Bildbeschreibung"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" class="pa-0">
                 <v-select
                   v-model="newImage.objectFit"
                   :items="['fill', 'contain', 'cover']"
@@ -56,54 +106,36 @@
                   dense
                 ></v-select>
               </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  v-model.number="newImage.y"
-                  label="Y-Position"
-                  type="number"
-                  outlined
-                  dense
-                ></v-text-field>
-                <v-text-field
-                  v-model.number="newImage.height"
-                  label="Höhe"
-                  type="number"
-                  outlined
-                  dense
-                ></v-text-field>
-                <v-text-field
-                  v-model.number="newImage.z_index"
-                  label="Hierarchie Position"
-                  type="number"
-                  outlined
-                  dense
-                ></v-text-field>
-                <v-text-field
-                  v-model="newImage.description"
-                  label="Bildbeschreibung"
-                  outlined
-                  dense
-                ></v-text-field>
+            </v-row>
+
+            <v-row>
+              <v-col sm="6" md="3" class="d-flex justify-center">
+                <v-btn color="#333333" @click="deleteImage" v-if="editImageCheck">Löschen</v-btn>
+              </v-col>
+              <v-col sm="6" md="3" class="d-flex justify-center">
+                <v-btn color="#333333" @click="updateShowPreview">Vorschau</v-btn>
+              </v-col>
+              <v-col sm="6" md="3" class="d-flex justify-center">
+                <v-btn color="#333333" @click="editImage" v-if="editImageCheck">Anwenden</v-btn>
+                <v-btn color="#333333" @click="addImage" v-else>Anwenden</v-btn>
+              </v-col>
+              <v-col sm="6" md="3" class="d-flex justify-center">
+                <v-btn color="#333333" @click="closePopup">Zurück</v-btn>
               </v-col>
             </v-row>
 
-            <div v-if="newImage.src" class="image-preview" style="overflow: scroll">
+            <div v-if="showPreview" class="image-preview" style="overflow: scroll">
+              <br />
               <img
+                v-if="newImage.src"
                 :src="newImage.src"
                 alt="Vorschau"
                 :style="`object-fit: ${newImage.objectFit};`"
               />
+              <p v-if="!newImage.src">Keine Vorschau verfügbar.</p>
             </div>
           </v-container>
         </v-card-text>
-
-        <v-card-actions>
-          <v-btn color="#333333" @click="deleteImage" v-if="editImageCheck">Löschen</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="#333333" @click="editImage" v-if="editImageCheck">OK</v-btn>
-          <v-btn color="#333333" @click="addImage" v-else>OK</v-btn>
-          <v-btn color="#333333" @click="closePopup">Abbrechen</v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -146,6 +178,7 @@ watch(isLoading, (newValue) => {
 
 const showPopup = ref(false)
 const editImageCheck = ref(false)
+const showPreview = ref(true)
 const newImage = ref({
   id: 0,
   name: '',
@@ -180,6 +213,7 @@ const onMouseDown = (event: MouseEvent) => {
   if (event.button === 2) rightClickActive = true
 
   if (leftClickActive && rightClickActive) {
+    editImageCheck.value = false
     openPopup()
   }
 }
@@ -196,7 +230,12 @@ const onRightClick = (event: MouseEvent) => {
   newImage.value.x = (event.clientX - svgRect.left - transform.x) / transform.k
   newImage.value.y = (event.clientY - svgRect.top - transform.y) / transform.k
 
-  showPopup.value = true
+  editImageCheck.value = false
+  openPopup()
+}
+
+const updateShowPreview = () => {
+  showPreview.value = !showPreview.value
 }
 
 const openPopup = () => {
@@ -207,7 +246,6 @@ const closePopup = () => {
   showPopup.value = false
   selectedFile.value = null
   newImage.value.src = ''
-  editImageCheck.value = false
   newImage.value = {
     id: 0,
     name: '',
@@ -367,23 +405,25 @@ const renderImages = () => {
         border.style('opacity', 0)
       })
       .on('click', function () {
-        newImage.value = {
-          id: img.id ? img.id : 0,
-          name: img.name ? img.name : '',
-          src: img.src,
-          x: img.x,
-          y: img.y,
-          width: img.width,
-          height: img.height,
-          border_radius: img.border_radius,
-          z_index: img.z_index,
-          objectFit: img.objectFit,
-          title: img.title,
-          description: img.description,
-        }
+        if (loggedIn == true) {
+          newImage.value = {
+            id: img.id ? img.id : 0,
+            name: img.name ? img.name : '',
+            src: img.src,
+            x: img.x,
+            y: img.y,
+            width: img.width,
+            height: img.height,
+            border_radius: img.border_radius,
+            z_index: img.z_index,
+            objectFit: img.objectFit,
+            title: img.title,
+            description: img.description,
+          }
 
-        showPopup.value = true
-        editImageCheck.value = true
+          showPopup.value = true
+          editImageCheck.value = true
+        }
       })
   })
 }
