@@ -127,7 +127,7 @@
             <div
               v-if="showPreview"
               class="image-preview"
-              style="overflow: scroll; scrollbar-gutter: stable; direction: rtl"
+              style="overflow: scroll; scrollbar-gutter: stable"
             >
               <br />
               <img
