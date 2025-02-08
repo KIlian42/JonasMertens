@@ -250,13 +250,13 @@ export const useImageStore = defineStore('image', {
           throw new Error('Bild nicht gefunden.')
         }
 
-        // Aktualisiere die Eigenschaften des Bildes
-        Object.assign(currentSettings.images[imageIndex], null)
+        // Bild aus settings.json entfernen
+        currentSettings.images.splice(imageIndex, 1)
 
         await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
           {
-            message: `Update settings.json for image ID ${id}`,
+            message: `Remove image ID ${id} from settings.json`,
             content: btoa(JSON.stringify(currentSettings, null, 2)),
             sha,
             branch: BRANCH,
@@ -270,12 +270,9 @@ export const useImageStore = defineStore('image', {
         )
 
         // Lokale Aktualisierung
-        const localImageIndex = this.images.findIndex((img) => img.id === updatedImage.id)
-        if (localImageIndex !== -1) {
-          Object.assign(this.images[localImageIndex], updatedImage)
-        }
+        this.images = this.images.filter((img) => img.id !== id)
       } catch (error: any) {
-        console.error('Fehler beim Bearbeiten des Bildes:', error.response?.data || error.message)
+        console.error('Fehler beim Löschen des Bildes:', error.response?.data || error.message)
         this.error = `Fehler: ${error.response?.data?.message || 'Unbekannter Fehler'}`
       }
     },

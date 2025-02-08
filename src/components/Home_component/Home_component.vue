@@ -88,7 +88,11 @@
             </v-row>
 
             <div v-if="newImage.src" class="image-preview">
-              <img :src="newImage.src" alt="Vorschau" :style="{ objectFit: newImage.objectFit }" />
+              <img
+                :src="newImage.src"
+                alt="Vorschau"
+                :style="`object-fit: ${newImage.objectFit};`"
+              />
             </div>
           </v-container>
         </v-card-text>
