@@ -87,7 +87,7 @@
               </v-col>
             </v-row>
 
-            <div v-if="newImage.src" class="image-preview">
+            <div v-if="newImage.src" class="image-preview" style="overflow: scroll">
               <img
                 :src="newImage.src"
                 alt="Vorschau"
