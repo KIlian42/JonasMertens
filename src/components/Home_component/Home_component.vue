@@ -11,7 +11,12 @@
       v-if="loggedIn"
       icon
       class="add-image-button"
-      @click="((editImageCheck = false), openPopup())"
+      @click="
+        (() => {
+          editImageCheck = false
+          openPopup()
+        })()
+      "
     >
       <v-icon size="62">mdi-plus-circle</v-icon>
     </btn>
@@ -132,7 +137,7 @@
               <br />
               <img
                 v-if="newImage.src"
-                :src="newImage.src"
+                :src="`${newImage.src}?v=${Math.random()}`"
                 alt="Vorschau"
                 :style="`object-fit: ${newImage.objectFit};`"
               />
@@ -146,15 +151,16 @@
 </template>
 
 <script setup lang="ts">
-console.log('Hallo, Welt!')
 import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
 import { useAuthStore } from '@/stores/authStore'
 import * as d3 from 'd3'
 
+/* -------------------------
+   Globale Variablen & Stores
+------------------------- */
 const container = ref<HTMLDivElement | null>(null)
 const svg = ref<SVGElement | null>(null)
-const fileInput = ref<HTMLInputElement | null>(null)
 const width = ref(0)
 const height = ref(0)
 let leftClickActive = false
@@ -163,12 +169,10 @@ let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const imageStore = useImageStore()
 const authStore = useAuthStore()
-
 const loggedIn = authStore.loggedIn
 
 const isLoading = ref(true)
 const images = computed(() => imageStore.getImages)
-
 const loadImages = async () => {
   await imageStore.loadImagesFromGitHub()
   isLoading.value = false
@@ -176,15 +180,13 @@ const loadImages = async () => {
 loadImages()
 
 watch(isLoading, (newValue) => {
-  if (!newValue) {
-    renderImages()
-  }
+  if (!newValue) renderImages()
 })
 
-const showPopup = ref(false)
-const editImageCheck = ref(false)
-const showPreview = ref(true)
-const newImage = ref({
+/* -------------------------
+   Default Image & Helper-Funktion
+------------------------- */
+const defaultImage = {
   id: 0,
   name: '',
   src: '',
@@ -197,9 +199,24 @@ const newImage = ref({
   objectFit: 'fill',
   title: '',
   description: '',
-})
-const selectedFile = ref<File | null>(null)
+}
 
+function getDefaultImage(overrides = {}) {
+  return { ...defaultImage, ...overrides }
+}
+
+/* -------------------------
+   Zustandsvariablen
+------------------------- */
+const showPopup = ref(false)
+const editImageCheck = ref(false)
+const showPreview = ref(true)
+const selectedFile = ref<File | null>(null)
+const newImage = ref(getDefaultImage())
+
+/* -------------------------
+   Methoden & Event-Handler
+------------------------- */
 const updateSize = () => {
   if (container.value) {
     width.value = container.value.clientWidth
@@ -228,7 +245,7 @@ const onRightClick = (event: MouseEvent) => {
   event.preventDefault()
   if (!svg.value) return
 
-  const svgElement = svg.value as SVGElement
+  const svgElement = svg.value
   const transform = d3.zoomTransform(svgElement)
   const svgRect = svgElement.getBoundingClientRect()
 
@@ -251,21 +268,7 @@ const closePopup = () => {
   console.log('close Popup')
   showPopup.value = false
   selectedFile.value = null
-  newImage.value.src = ''
-  newImage.value = {
-    id: 0,
-    name: '',
-    src: '',
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    border_radius: 0,
-    z_index: 1,
-    objectFit: 'fill',
-    title: '',
-    description: '',
-  }
+  newImage.value = getDefaultImage()
 }
 
 const onFileChange = (event: Event) => {
@@ -277,13 +280,11 @@ const onFileChange = (event: Event) => {
 }
 
 const addImage = async () => {
-  console.log('wrong', selectedFile)
   if (selectedFile.value) {
     const imageName = `image_${Date.now()}.${selectedFile.value.name.split('.').pop()}`
     const reader = new FileReader()
 
     reader.onload = async (e) => {
-      const base64String = (e.target?.result as string).split(',')[1]
       await imageStore.addImage({
         ...newImage.value,
         src: newImage.value.src,
@@ -292,22 +293,15 @@ const addImage = async () => {
       renderImages()
       closePopup()
     }
-
     reader.readAsDataURL(selectedFile.value)
   }
 }
 
 const editImage = async () => {
-  console.log('to here1')
   try {
-    await imageStore.editImage({
-      ...newImage.value,
-    })
-
-    // Aktualisiere die Bilder nach erfolgreicher Bearbeitung
-    await imageStore.loadImagesFromGitHub() // Oder eine andere Methode, um die Bilder neu zu laden
-    renderImages() // Aktualisiert die gerenderten Bilder
-
+    await imageStore.editImage({ ...newImage.value })
+    await imageStore.loadImagesFromGitHub()
+    renderImages()
     closePopup()
   } catch (error) {
     console.error('Fehler beim Bearbeiten des Bildes:', error)
@@ -315,17 +309,9 @@ const editImage = async () => {
 }
 
 const deleteImage = async () => {
-  if (selectedFile.value) {
-    const reader = new FileReader()
-
-    reader.onload = async (e) => {
-      await imageStore.deleteImage(newImage.value.id)
-      renderImages()
-      closePopup()
-    }
-
-    reader.readAsDataURL(selectedFile.value)
-  }
+  await imageStore.deleteImage(newImage.value.id)
+  renderImages()
+  closePopup()
 }
 
 const onDrop = async (event: DragEvent) => {
@@ -333,43 +319,37 @@ const onDrop = async (event: DragEvent) => {
   event.preventDefault()
   if (!event.clientX || !event.clientY || !svg.value || !event.dataTransfer?.files.length) return
 
-  const svgElement = svg.value as SVGElement
+  const svgElement = svg.value
   const transform = d3.zoomTransform(svgElement)
   const svgRect = svgElement.getBoundingClientRect()
-
   const x = (event.clientX - svgRect.left - transform.x) / transform.k
   const y = (event.clientY - svgRect.top - transform.y) / transform.k
 
   selectedFile.value = event.dataTransfer.files[0]
-  newImage.value = {
-    id: 0,
-    name: '',
+  newImage.value = getDefaultImage({
     src: URL.createObjectURL(selectedFile.value),
     x,
     y,
-    width: 100,
-    height: 100,
-    border_radius: 0,
-    z_index: 1,
-    objectFit: 'fill',
-    title: '',
-    description: '',
-  }
+  })
 
   showPopup.value = true
 }
 
 const renderImages = () => {
   if (!mainContainer) return
-  mainContainer.selectAll('g.image-group').remove()
+
+  // Entferne ALLE Inhalte aus mainContainer (sowohl Gruppen als auch defs)
+  mainContainer.selectAll('*').remove()
+
+  // Lege einen neuen defs-Container an, in den alle ClipPaths eingefügt werden
+  const defs = mainContainer.append('defs')
 
   images.value.forEach((img, index) => {
     const group = mainContainer.append('g').attr('class', 'image-group')
-
-    // Definiere das Clip-Path
     const clipPathId = `clip-path-${index}`
-    mainContainer
-      .append('defs')
+
+    // Erstelle den ClipPath im neuen defs-Container
+    defs
       .append('clipPath')
       .attr('id', clipPathId)
       .append('rect')
@@ -377,10 +357,10 @@ const renderImages = () => {
       .attr('y', img.y)
       .attr('width', img.width)
       .attr('height', img.height)
-      .attr('rx', img.border_radius ?? 20) // Radius für Abrundung
+      .attr('rx', img.border_radius ?? 20)
       .attr('ry', img.border_radius ?? 20)
 
-    // Rahmen
+    // Rahmen (nur zur Hervorhebung beim Mouseover)
     const border = group
       .append('rect')
       .attr('x', img.x)
@@ -394,8 +374,8 @@ const renderImages = () => {
       .attr('stroke-width', 10)
       .style('opacity', 0)
 
-    // Bild mit Clip-Path
-    const imageElement = group
+    // Bild hinzufügen und den ClipPath anwenden
+    group
       .append('image')
       .attr('x', img.x)
       .attr('y', img.y)
@@ -403,8 +383,8 @@ const renderImages = () => {
       .attr('height', img.height)
       .attr('href', img.src)
       .attr('alt', img.description)
-      .attr('preserveAspectRatio', 'none') // Objekt soll den Bereich füllen
-      .attr('clip-path', `url(#${clipPathId})`) // Clip-Path für Abrundung
+      .attr('preserveAspectRatio', 'none')
+      .attr('clip-path', `url(#${clipPathId})`)
       .style('cursor', 'pointer')
       .on('mouseover', function () {
         border.style('opacity', 1)
@@ -413,10 +393,10 @@ const renderImages = () => {
         border.style('opacity', 0)
       })
       .on('click', function () {
-        if (loggedIn == true) {
-          newImage.value = {
-            id: img.id ? img.id : 0,
-            name: img.name ? img.name : '',
+        if (loggedIn) {
+          newImage.value = getDefaultImage({
+            id: img.id,
+            name: img.name,
             src: img.src,
             x: img.x,
             y: img.y,
@@ -427,8 +407,7 @@ const renderImages = () => {
             objectFit: img.objectFit,
             title: img.title,
             description: img.description,
-          }
-
+          })
           showPopup.value = true
           editImageCheck.value = true
         }
@@ -438,24 +417,22 @@ const renderImages = () => {
 
 const initView = (ref: SVGElement | null) => {
   if (!ref) return
-
-  const svg = d3.select(ref)
-  mainContainer = svg.append('g').classed('container', true)
+  const svgSel = d3.select(ref)
+  mainContainer = svgSel.append('g').classed('container', true)
 
   const zoom = d3
     .zoom<SVGElement, unknown>()
-    .scaleExtent([0.01, 1000]) // Min- und Max-Zoom
+    .scaleExtent([0.01, 1000])
     .on('zoom', onZoom)
     .filter((event: any) => !(event.type === 'wheel' && event.ctrlKey))
 
-  svg.call(zoom)
+  svgSel.call(zoom)
 
-  // Initial View (Zoom und Position)
-  let initialZoomLevel = 1.1 // Zoom 150%
-  let initialX = 810 // Standardposition
-  let initialY = 350 // 50px nach unten verschoben
+  // Initialer View-Zoom und -Position
+  let initialZoomLevel = 1.1
+  let initialX = 810
+  let initialY = 350
 
-  // Anpassung der X-Position bei kleineren Bildschirmen
   if (window.innerWidth < 1200) {
     initialZoomLevel = 0.41
     initialX -= 635
@@ -463,8 +440,13 @@ const initView = (ref: SVGElement | null) => {
   }
 
   const initialView = d3.zoomIdentity.translate(initialX, initialY).scale(initialZoomLevel)
+  svgSel.call(zoom.transform, initialView)
+}
 
-  svg.call(zoom.transform, initialView)
+// Definiere die Funktion, die auf 'mouseup' reagiert, um beide Klick-Flags zurückzusetzen
+const handleMouseUp = () => {
+  leftClickActive = false
+  rightClickActive = false
 }
 
 onMounted(() => {
@@ -472,19 +454,13 @@ onMounted(() => {
     updateSize()
     initView(svg.value)
     window.addEventListener('resize', updateSize)
-    window.addEventListener('mouseup', () => {
-      leftClickActive = false
-      rightClickActive = false
-    })
+    window.addEventListener('mouseup', handleMouseUp)
   })
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateSize)
-  window.removeEventListener('mouseup', () => {
-    leftClickActive = false
-    rightClickActive = false
-  })
+  window.removeEventListener('mouseup', handleMouseUp)
 })
 </script>
 

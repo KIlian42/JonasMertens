@@ -39,14 +39,32 @@ export const useImageStore = defineStore('image', {
       this.loading = true
       this.error = null
 
-      const jsonUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}/${SETTINGS_FILE_PATH}`
+      // GitHub API URL: liefert ein JSON-Objekt, in dem u.a. der base64-codierte Dateiinhalt enthalten ist
+      const apiUrl = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${new Date().getTime()}`
 
       try {
-        const response = await axios.get(jsonUrl)
-        if (response.data && response.data.images) {
-          this.images = response.data.images
+        const response = await axios.get(apiUrl, {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            // Falls erforderlich, kannst du hier auch den Authorization-Header setzen,
+            // z.B. Authorization: `token ${useAuthStore().password}`
+          },
+        })
+
+        // Der API-Endpunkt liefert ein Objekt mit einer base64-codierten "content"-Eigenschaft.
+        if (response.data && response.data.content) {
+          // Base64-dekodieren und als JSON parsen:
+          const decodedContent = atob(response.data.content)
+          const settingsData = JSON.parse(decodedContent)
+
+          if (settingsData && settingsData.images) {
+            this.images = settingsData.images
+            console.log('Geladene Bilder:', this.images)
+          } else {
+            throw new Error('Keine Bilddaten gefunden.')
+          }
         } else {
-          throw new Error('Keine Bilddaten gefunden.')
+          throw new Error('Ungültige Antwort vom API-Endpunkt.')
         }
       } catch (error: any) {
         console.error('Fehler beim Laden der JSON-Daten:', error)
