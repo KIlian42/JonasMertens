@@ -250,7 +250,7 @@ export const useImageStore = defineStore('image', {
       const GITHUB_PAT = authStore.password
 
       try {
-        // Lade aktuelle settings.json
+        // 1. Lade die aktuelle settings.json
         const settingsResponse = await axios.get(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
           {
@@ -264,14 +264,16 @@ export const useImageStore = defineStore('image', {
         const sha = settingsResponse.data.sha
         const currentSettings = JSON.parse(atob(settingsResponse.data.content))
 
+        // 2. Finde das Bild in settings.json anhand der ID
         const imageIndex = currentSettings.images.findIndex((img: any) => img.id === id)
         if (imageIndex === -1) {
           throw new Error('Bild nicht gefunden.')
         }
 
-        // Bild aus settings.json entfernen
-        currentSettings.images.splice(imageIndex, 1)
+        // Entferne das Bild aus settings.json und merke dir die Bilddaten (insbesondere den Dateinamen)
+        const removedImage = currentSettings.images.splice(imageIndex, 1)[0]
 
+        // 3. Aktualisiere settings.json im Repository
         await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
           {
@@ -288,7 +290,35 @@ export const useImageStore = defineStore('image', {
           },
         )
 
-        // Lokale Aktualisierung
+        // 4. Lösche das Bild aus dem Repository (im Ordner "images")
+        const imagePath = `${IMAGES_FOLDER_PATH}${removedImage.name}`
+
+        // Hole zuerst den SHA-Wert der Bilddatei, da dieser für die Lösch-Anfrage benötigt wird
+        const imageResponse = await axios.get(
+          `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${imagePath}?ref=${BRANCH}`,
+          {
+            headers: {
+              Authorization: `token ${GITHUB_PAT}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          },
+        )
+        const imageSha = imageResponse.data.sha
+
+        // Sende die DELETE-Anfrage, um die Bilddatei zu löschen
+        await axios.delete(`${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${imagePath}`, {
+          data: {
+            message: `Delete image file ${removedImage.name}`,
+            sha: imageSha,
+            branch: BRANCH,
+          },
+          headers: {
+            Authorization: `token ${GITHUB_PAT}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        })
+
+        // 5. Aktualisiere auch das lokale Array
         this.images = this.images.filter((img) => img.id !== id)
       } catch (error: any) {
         console.error('Fehler beim Löschen des Bildes:', error.response?.data || error.message)

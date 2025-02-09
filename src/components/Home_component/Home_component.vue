@@ -309,9 +309,14 @@ const editImage = async () => {
 }
 
 const deleteImage = async () => {
-  await imageStore.deleteImage(newImage.value.id)
-  renderImages()
-  closePopup()
+  try {
+    await imageStore.deleteImage(newImage.value.id)
+    await imageStore.loadImagesFromGitHub()
+    renderImages()
+    closePopup()
+  } catch (error) {
+    console.error('Fehler beim Bearbeiten des Bildes:', error)
+  }
 }
 
 const onDrop = async (event: DragEvent) => {
