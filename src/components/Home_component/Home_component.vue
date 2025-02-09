@@ -146,6 +146,7 @@
 </template>
 
 <script setup lang="ts">
+console.log('Hallo, Welt!')
 import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -247,6 +248,7 @@ const openPopup = () => {
 }
 
 const closePopup = () => {
+  console.log('close Popup')
   showPopup.value = false
   selectedFile.value = null
   newImage.value.src = ''
@@ -275,6 +277,7 @@ const onFileChange = (event: Event) => {
 }
 
 const addImage = async () => {
+  console.log('wrong', selectedFile)
   if (selectedFile.value) {
     const imageName = `image_${Date.now()}.${selectedFile.value.name.split('.').pop()}`
     const reader = new FileReader()
@@ -295,18 +298,19 @@ const addImage = async () => {
 }
 
 const editImage = async () => {
-  if (selectedFile.value) {
-    const reader = new FileReader()
+  console.log('to here1')
+  try {
+    await imageStore.editImage({
+      ...newImage.value,
+    })
 
-    reader.onload = async (e) => {
-      await imageStore.editImage({
-        ...newImage.value,
-      })
-      renderImages()
-      closePopup()
-    }
+    // Aktualisiere die Bilder nach erfolgreicher Bearbeitung
+    await imageStore.loadImagesFromGitHub() // Oder eine andere Methode, um die Bilder neu zu laden
+    renderImages() // Aktualisiert die gerenderten Bilder
 
-    reader.readAsDataURL(selectedFile.value)
+    closePopup()
+  } catch (error) {
+    console.error('Fehler beim Bearbeiten des Bildes:', error)
   }
 }
 

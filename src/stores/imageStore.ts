@@ -171,6 +171,7 @@ export const useImageStore = defineStore('image', {
       title?: string
       description?: string
     }) {
+      console.log('to here2')
       const authStore = useAuthStore()
       const GITHUB_PAT = authStore.password
 
