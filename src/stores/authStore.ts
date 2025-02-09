@@ -4,6 +4,8 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
+    userToken:
+      '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',
     username: 'berlin',
     password: '',
     loggedIn: false,

@@ -1,5 +1,4 @@
 // imageStore.ts
-
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore'
@@ -9,6 +8,14 @@ const BRANCH = 'main'
 const SETTINGS_FILE_PATH = 'settings.json'
 const IMAGES_FOLDER_PATH = 'images/'
 const GITHUB_API_BASE_URL = 'https://api.github.com/repos'
+
+// Hilfsfunktion für gemeinsame Request-Header
+function getHeaders(token: string) {
+  return {
+    Authorization: `token ${token}`,
+    Accept: 'application/vnd.github.v3+json',
+  }
+}
 
 export const useImageStore = defineStore('image', {
   state: () => ({
@@ -35,37 +42,50 @@ export const useImageStore = defineStore('image', {
   },
 
   actions: {
+    async fetchImageDataUrl(imageName: string): Promise<string> {
+      const authStore = useAuthStore()
+      const token = authStore.userToken
+      const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${IMAGES_FOLDER_PATH}${imageName}?ref=${BRANCH}`
+
+      try {
+        const { data } = await axios.get(url, { headers: getHeaders(token) })
+        const base64Content = data.content.replace(/\n/g, '')
+        // Bestimme MIME-Type anhand der Dateiendung (PNG als Standard)
+        const mimeType = imageName.match(/\.(jpe?g|gif)$/i)
+          ? imageName.endsWith('.gif')
+            ? 'image/gif'
+            : 'image/jpeg'
+          : 'image/png'
+        return `data:${mimeType};base64,${base64Content}`
+      } catch (error) {
+        console.error(`Fehler beim Laden des Bildes ${imageName}:`, error)
+        throw error
+      }
+    },
+
     async loadImagesFromGitHub() {
       this.loading = true
       this.error = null
-
-      // GitHub API URL: liefert ein JSON-Objekt, in dem u.a. der base64-codierte Dateiinhalt enthalten ist
-      const apiUrl = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${new Date().getTime()}`
+      const authStore = useAuthStore()
+      const token = authStore.userToken
+      const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${Date.now()}`
 
       try {
-        const response = await axios.get(apiUrl, {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-            // Falls erforderlich, kannst du hier auch den Authorization-Header setzen,
-            // z.B. Authorization: `token ${useAuthStore().password}`
-          },
-        })
-
-        // Der API-Endpunkt liefert ein Objekt mit einer base64-codierten "content"-Eigenschaft.
-        if (response.data && response.data.content) {
-          // Base64-dekodieren und als JSON parsen:
-          const decodedContent = atob(response.data.content)
-          const settingsData = JSON.parse(decodedContent)
-
-          if (settingsData && settingsData.images) {
-            this.images = settingsData.images
-            console.log('Geladene Bilder:', this.images)
-          } else {
-            throw new Error('Keine Bilddaten gefunden.')
-          }
-        } else {
-          throw new Error('Ungültige Antwort vom API-Endpunkt.')
-        }
+        const { data } = await axios.get(url, { headers: getHeaders(token) })
+        if (!data.content) throw new Error('Ungültige API-Antwort.')
+        const settings = JSON.parse(atob(data.content))
+        if (!settings.images) throw new Error('Keine Bilddaten gefunden.')
+        this.images = await Promise.all(
+          settings.images.map(async (img: any) => {
+            try {
+              const dataUrl = await this.fetchImageDataUrl(img.name)
+              return { ...img, src: dataUrl }
+            } catch (e) {
+              console.error(`Fehler beim Laden von Bild ${img.name}:`, e)
+              return img
+            }
+          }),
+        )
       } catch (error: any) {
         console.error('Fehler beim Laden der JSON-Daten:', error)
         this.error = 'Fehler beim Laden der Bilddaten.'
@@ -89,69 +109,36 @@ export const useImageStore = defineStore('image', {
       description: string
     }) {
       const authStore = useAuthStore()
-      const GITHUB_PAT = authStore.password // PAT aus authStore
+      // Hier wird der PAT aus "password" verwendet
+      const token = authStore.password
+      const imageName = image.name || `image_${Date.now()}.png`
 
       try {
-        const imageName = image.name || `image_${Date.now()}.png`
+        // Falls src bereits eine Data-URL ist, extrahiere den Base64-Teil,
+        // ansonsten konvertiere die externe URL.
+        const imageBase64 = image.src.startsWith('data:')
+          ? image.src.split(',')[1]
+          : await this.convertImageToBase64(image.src)
 
-        // Falls src eine Data-URL ist, extrahiere Base64 direkt
-        let imageBase64 = ''
-        if (image.src.startsWith('data:')) {
-          imageBase64 = image.src.split(',')[1]
-        } else {
-          imageBase64 = await this.convertImageToBase64(image.src)
-        }
-
-        // 1. Bild in GitHub hochladen
+        // Bilddatei hochladen
         await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${IMAGES_FOLDER_PATH}${imageName}`,
-          {
-            message: `Add image ${imageName}`,
-            content: imageBase64,
-            branch: BRANCH,
-          },
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { message: `Add image ${imageName}`, content: imageBase64, branch: BRANCH },
+          { headers: getHeaders(token) },
         )
 
-        const uploadedImageUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}/${IMAGES_FOLDER_PATH}${imageName}`
-
-        // 2. settings.json aktualisieren
-        const settingsResponse = await axios.get(
+        // settings.json abrufen und aktualisieren
+        const settingsRes = await axios.get(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
-
-        const sha = settingsResponse.data.sha
-        const currentSettings = JSON.parse(atob(settingsResponse.data.content))
+        const sha = settingsRes.data.sha
+        const currentSettings = JSON.parse(atob(settingsRes.data.content))
         const newId = currentSettings.images.length
           ? Math.max(...currentSettings.images.map((img: any) => img.id)) + 1
           : 1
 
-        const newImage = {
-          id: newId,
-          name: imageName,
-          src: uploadedImageUrl,
-          x: image.x,
-          y: image.y,
-          width: image.width,
-          height: image.height,
-          border_radius: image.border_radius,
-          z_index: image.z_index,
-          objectFit: image.objectFit,
-          title: image.title,
-          description: image.description,
-        }
-
+        const newImage = { ...image, id: newId, name: imageName, src: '' }
         currentSettings.images.push(newImage)
 
         await axios.put(
@@ -162,12 +149,7 @@ export const useImageStore = defineStore('image', {
             sha,
             branch: BRANCH,
           },
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
 
         this.images.push(newImage)
@@ -189,35 +171,20 @@ export const useImageStore = defineStore('image', {
       title?: string
       description?: string
     }) {
-      console.log('to here2')
       const authStore = useAuthStore()
-      const GITHUB_PAT = authStore.password
+      const token = authStore.password
 
       try {
-        // Lade aktuelle settings.json
-        const settingsResponse = await axios.get(
+        const settingsRes = await axios.get(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
+        const sha = settingsRes.data.sha
+        const currentSettings = JSON.parse(atob(settingsRes.data.content))
+        const index = currentSettings.images.findIndex((img: any) => img.id === updatedImage.id)
+        if (index === -1) throw new Error('Bild nicht gefunden.')
 
-        const sha = settingsResponse.data.sha
-        const currentSettings = JSON.parse(atob(settingsResponse.data.content))
-
-        const imageIndex = currentSettings.images.findIndex(
-          (img: any) => img.id === updatedImage.id,
-        )
-        if (imageIndex === -1) {
-          throw new Error('Bild nicht gefunden.')
-        }
-
-        // Aktualisiere die Eigenschaften des Bildes
-        Object.assign(currentSettings.images[imageIndex], updatedImage)
-
+        Object.assign(currentSettings.images[index], updatedImage)
         await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
           {
@@ -226,19 +193,11 @@ export const useImageStore = defineStore('image', {
             sha,
             branch: BRANCH,
           },
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
 
-        // Lokale Aktualisierung
-        const localImageIndex = this.images.findIndex((img) => img.id === updatedImage.id)
-        if (localImageIndex !== -1) {
-          Object.assign(this.images[localImageIndex], updatedImage)
-        }
+        const localIndex = this.images.findIndex((img) => img.id === updatedImage.id)
+        if (localIndex !== -1) Object.assign(this.images[localIndex], updatedImage)
       } catch (error: any) {
         console.error('Fehler beim Bearbeiten des Bildes:', error.response?.data || error.message)
         this.error = `Fehler: ${error.response?.data?.message || 'Unbekannter Fehler'}`
@@ -247,33 +206,20 @@ export const useImageStore = defineStore('image', {
 
     async deleteImage(id: number) {
       const authStore = useAuthStore()
-      const GITHUB_PAT = authStore.password
+      const token = authStore.password
 
       try {
-        // 1. Lade die aktuelle settings.json
-        const settingsResponse = await axios.get(
+        // settings.json abrufen und Bild entfernen
+        const settingsRes = await axios.get(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
+        const sha = settingsRes.data.sha
+        const currentSettings = JSON.parse(atob(settingsRes.data.content))
+        const index = currentSettings.images.findIndex((img: any) => img.id === id)
+        if (index === -1) throw new Error('Bild nicht gefunden.')
 
-        const sha = settingsResponse.data.sha
-        const currentSettings = JSON.parse(atob(settingsResponse.data.content))
-
-        // 2. Finde das Bild in settings.json anhand der ID
-        const imageIndex = currentSettings.images.findIndex((img: any) => img.id === id)
-        if (imageIndex === -1) {
-          throw new Error('Bild nicht gefunden.')
-        }
-
-        // Entferne das Bild aus settings.json und merke dir die Bilddaten (insbesondere den Dateinamen)
-        const removedImage = currentSettings.images.splice(imageIndex, 1)[0]
-
-        // 3. Aktualisiere settings.json im Repository
+        const removedImage = currentSettings.images.splice(index, 1)[0]
         await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
           {
@@ -282,43 +228,25 @@ export const useImageStore = defineStore('image', {
             sha,
             branch: BRANCH,
           },
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
 
-        // 4. Lösche das Bild aus dem Repository (im Ordner "images")
+        // Bilddatei löschen
         const imagePath = `${IMAGES_FOLDER_PATH}${removedImage.name}`
-
-        // Hole zuerst den SHA-Wert der Bilddatei, da dieser für die Lösch-Anfrage benötigt wird
-        const imageResponse = await axios.get(
+        const imageRes = await axios.get(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${imagePath}?ref=${BRANCH}`,
-          {
-            headers: {
-              Authorization: `token ${GITHUB_PAT}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          },
+          { headers: getHeaders(token) },
         )
-        const imageSha = imageResponse.data.sha
-
-        // Sende die DELETE-Anfrage, um die Bilddatei zu löschen
+        const imageSha = imageRes.data.sha
         await axios.delete(`${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${imagePath}`, {
           data: {
             message: `Delete image file ${removedImage.name}`,
             sha: imageSha,
             branch: BRANCH,
           },
-          headers: {
-            Authorization: `token ${GITHUB_PAT}`,
-            Accept: 'application/vnd.github.v3+json',
-          },
+          headers: getHeaders(token),
         })
 
-        // 5. Aktualisiere auch das lokale Array
         this.images = this.images.filter((img) => img.id !== id)
       } catch (error: any) {
         console.error('Fehler beim Löschen des Bildes:', error.response?.data || error.message)
@@ -335,8 +263,7 @@ export const useImageStore = defineStore('image', {
           if (xhr.status === 200) {
             const reader = new FileReader()
             reader.onloadend = function () {
-              const base64data = (reader.result as string).split(',')[1] // Base64-Daten extrahieren
-              resolve(base64data)
+              resolve((reader.result as string).split(',')[1])
             }
             reader.onerror = reject
             reader.readAsDataURL(xhr.response)
