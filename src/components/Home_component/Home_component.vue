@@ -346,14 +346,14 @@ const renderImages = () => {
   // Entferne ALLE Inhalte aus mainContainer (sowohl Gruppen als auch defs)
   mainContainer.selectAll('*').remove()
 
-  // Lege einen neuen defs-Container an, in den alle ClipPaths eingefügt werden
+  // Erstelle einen neuen defs-Container für die ClipPaths
   const defs = mainContainer.append('defs')
 
   images.value.forEach((img, index) => {
     const group = mainContainer.append('g').attr('class', 'image-group')
     const clipPathId = `clip-path-${index}`
 
-    // Erstelle den ClipPath im neuen defs-Container
+    // Erstelle den ClipPath im defs-Container
     defs
       .append('clipPath')
       .attr('id', clipPathId)
@@ -417,6 +417,25 @@ const renderImages = () => {
           editImageCheck.value = true
         }
       })
+
+    // Headline (Titel) hinzufügen – 20 Pixel unter dem Bild
+    group
+      .append('text')
+      .attr('x', img.x)
+      .attr('y', img.y + img.height + 20)
+      .text(img.title)
+      .attr('fill', '#000')
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+
+    // Beschreibung hinzufügen – 20 Pixel unter der Headline (also 40 Pixel unter dem Bild)
+    group
+      .append('text')
+      .attr('x', img.x)
+      .attr('y', img.y + img.height + 40)
+      .text(img.description)
+      .attr('fill', '#333')
+      .attr('font-size', '14px')
   })
 }
 
