@@ -1,6 +1,6 @@
-# Jonas Mertens homepage
+# Jonas Mertens
 
-A personal interactive homepage for Jonas Mertens (A friend and photographer from Berlin).
+A personal interactive homepage for Jonas Mertens (a friend and photographer from Berlin).
 The actual homepage can be found here: https://jonasmertens.pages.dev
 
 This template should help get you started developing with Vue 3 in Vite.
