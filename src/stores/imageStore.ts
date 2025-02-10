@@ -46,7 +46,8 @@ export const useImageStore = defineStore('image', {
       this.loading = true
       this.error = null
       const authStore = useAuthStore()
-      const token = authStore.userToken
+      const token =
+        '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'
       const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${Date.now()}`
 
       try {
