@@ -343,11 +343,20 @@ const onDrop = async (event: DragEvent) => {
 const renderImages = () => {
   if (!mainContainer) return
 
-  // Entferne ALLE Inhalte aus mainContainer (sowohl Gruppen als auch defs)
+  // Entferne alle Inhalte (sowohl Gruppen als auch defs)
   mainContainer.selectAll('*').remove()
 
   // Erstelle einen neuen defs-Container für die ClipPaths
   const defs = mainContainer.append('defs')
+
+  // Hilfsfunktion zum Escapen von Sonderzeichen (z. B. Umlauten)
+  const escapeHTML = (str: string) =>
+    str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
 
   images.value.forEach((img, index) => {
     const group = mainContainer.append('g').attr('class', 'image-group')
@@ -365,7 +374,7 @@ const renderImages = () => {
       .attr('rx', img.border_radius ?? 20)
       .attr('ry', img.border_radius ?? 20)
 
-    // Rahmen (nur zur Hervorhebung beim Mouseover)
+    // Rahmen (zur Hervorhebung beim Mouseover)
     const border = group
       .append('rect')
       .attr('x', img.x)
@@ -391,13 +400,9 @@ const renderImages = () => {
       .attr('preserveAspectRatio', 'none')
       .attr('clip-path', `url(#${clipPathId})`)
       .style('cursor', 'pointer')
-      .on('mouseover', function () {
-        border.style('opacity', 1)
-      })
-      .on('mouseout', function () {
-        border.style('opacity', 0)
-      })
-      .on('click', function () {
+      .on('mouseover', () => border.style('opacity', 1))
+      .on('mouseout', () => border.style('opacity', 0))
+      .on('click', () => {
         if (loggedIn) {
           newImage.value = getDefaultImage({
             id: img.id,
@@ -418,24 +423,43 @@ const renderImages = () => {
         }
       })
 
-    // Headline (Titel) hinzufügen – 20 Pixel unter dem Bild
+    // Überschrift (Titel) als HTML-Element in foreignObject einbetten
     group
-      .append('text')
+      .append('foreignObject')
       .attr('x', img.x)
       .attr('y', img.y + img.height + 20)
-      .text(img.title)
-      .attr('fill', '#000')
-      .attr('font-size', '16px')
-      .attr('font-weight', 'bold')
+      .attr('width', img.width)
+      .attr('height', 40)
+      .append('xhtml:div')
+      .attr('xmlns', 'http://www.w3.org/1999/xhtml').html(`
+        <html>
+          <head>
+            <meta charset="UTF-8" />
+          </head>
+          <body style="margin:0; font-size:16px; font-weight:bold; color:#000; line-height:1.2;">
+            <p style="margin:0;">${escapeHTML(img.title)}</p>
+          </body>
+        </html>
+      `)
 
-    // Beschreibung hinzufügen – 20 Pixel unter der Headline (also 40 Pixel unter dem Bild)
+    // Beschreibung als HTML-Element in foreignObject einbetten
     group
-      .append('text')
+      .append('foreignObject')
       .attr('x', img.x)
-      .attr('y', img.y + img.height + 40)
-      .text(img.description)
-      .attr('fill', '#333')
-      .attr('font-size', '14px')
+      .attr('y', img.y + img.height + 60)
+      .attr('width', img.width)
+      .attr('height', 1000)
+      .append('xhtml:div')
+      .attr('xmlns', 'http://www.w3.org/1999/xhtml').html(`
+        <html>
+          <head>
+            <meta charset="UTF-8" />
+          </head>
+          <body style="margin:0; font-size:14px; color:#333; line-height:1.2;">
+            <p style="margin:0;">${escapeHTML(img.description)}</p>
+          </body>
+        </html>
+      `)
   })
 }
 
