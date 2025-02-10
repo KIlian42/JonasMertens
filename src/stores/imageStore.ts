@@ -42,27 +42,6 @@ export const useImageStore = defineStore('image', {
   },
 
   actions: {
-    async fetchImageDataUrl(imageName: string): Promise<string> {
-      const authStore = useAuthStore()
-      const token = authStore.userToken
-      const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${IMAGES_FOLDER_PATH}${imageName}?ref=${BRANCH}`
-
-      try {
-        const { data } = await axios.get(url, { headers: getHeaders(token) })
-        const base64Content = data.content.replace(/\n/g, '')
-        // Bestimme MIME-Type anhand der Dateiendung (PNG als Standard)
-        const mimeType = imageName.match(/\.(jpe?g|gif)$/i)
-          ? imageName.endsWith('.gif')
-            ? 'image/gif'
-            : 'image/jpeg'
-          : 'image/png'
-        return `data:${mimeType};base64,${base64Content}`
-      } catch (error) {
-        console.error(`Fehler beim Laden des Bildes ${imageName}:`, error)
-        throw error
-      }
-    },
-
     async loadImagesFromGitHub() {
       this.loading = true
       this.error = null
@@ -75,17 +54,12 @@ export const useImageStore = defineStore('image', {
         if (!data.content) throw new Error('Ungültige API-Antwort.')
         const settings = JSON.parse(atob(data.content))
         if (!settings.images) throw new Error('Keine Bilddaten gefunden.')
-        this.images = await Promise.all(
-          settings.images.map(async (img: any) => {
-            try {
-              const dataUrl = await this.fetchImageDataUrl(img.name)
-              return { ...img, src: dataUrl }
-            } catch (e) {
-              console.error(`Fehler beim Laden von Bild ${img.name}:`, e)
-              return img
-            }
-          }),
-        )
+
+        // Statt den Base64-Content zu laden, wird der direkte Raw-Link berechnet:
+        this.images = settings.images.map((img: any) => {
+          const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}/${IMAGES_FOLDER_PATH}${img.name}`
+          return { ...img, src: rawUrl }
+        })
       } catch (error: any) {
         console.error('Fehler beim Laden der JSON-Daten:', error)
         this.error = 'Fehler beim Laden der Bilddaten.'
