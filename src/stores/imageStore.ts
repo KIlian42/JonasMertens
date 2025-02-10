@@ -45,22 +45,14 @@ export const useImageStore = defineStore('image', {
     async loadImagesFromGitHub() {
       this.loading = true
       this.error = null
-      const authStore = useAuthStore()
-      const token =
-        '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'
       const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${Date.now()}`
 
       try {
-        const { data } = await axios.get(url, { headers: getHeaders(token) })
+        const { data } = await axios.get(url)
         if (!data.content) throw new Error('Ungültige API-Antwort.')
-        const settings = JSON.parse(atob(data.content))
-        if (!settings.images) throw new Error('Keine Bilddaten gefunden.')
-
-        // Statt den Base64-Content zu laden, wird der direkte Raw-Link berechnet:
-        this.images = settings.images.map((img: any) => {
-          const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}/${IMAGES_FOLDER_PATH}${img.name}`
-          return { ...img, src: rawUrl }
-        })
+        const { images } = JSON.parse(atob(data.content))
+        if (!images) throw new Error('Keine Bilddaten gefunden.')
+        this.images = images
       } catch (error: any) {
         console.error('Fehler beim Laden der JSON-Daten:', error)
         this.error = 'Fehler beim Laden der Bilddaten.'
