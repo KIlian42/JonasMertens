@@ -8,6 +8,7 @@ const BRANCH = 'main'
 const SETTINGS_FILE_PATH = 'settings.json'
 const IMAGES_FOLDER_PATH = 'images/'
 const GITHUB_API_BASE_URL = 'https://api.github.com/repos'
+const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com'
 
 // Hilfsfunktion für gemeinsame Request-Header
 function getHeaders(token: string) {
@@ -105,7 +106,12 @@ export const useImageStore = defineStore('image', {
           ? Math.max(...currentSettings.images.map((img: any) => img.id)) + 1
           : 1
 
-        const newImage = { ...image, id: newId, name: imageName, src: '' }
+        const newImage = {
+          ...image,
+          id: newId,
+          name: imageName,
+          src: `${GITHUB_RAW_BASE_URL}/${GITHUB_REPO}/main/${IMAGES_FOLDER_PATH}${imageName}`,
+        }
         currentSettings.images.push(newImage)
 
         await axios.put(
