@@ -29,6 +29,7 @@
           <v-container fluid>
             <v-file-input
               v-if="!editImageCheck"
+              v-model="selectedFile"
               label="Bilddatei"
               @change="onFileChange"
               outlined
@@ -43,6 +44,8 @@
                   type="number"
                   outlined
                   dense
+                  step="1"
+                  @input="newImage.x = Math.round(newImage.x || 0)"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" class="pa-1">
@@ -52,6 +55,8 @@
                   type="number"
                   outlined
                   dense
+                  step="1"
+                  @input="newImage.y = Math.round(newImage.y || 0)"
                 ></v-text-field>
               </v-col>
 
@@ -62,6 +67,9 @@
                   type="number"
                   outlined
                   dense
+                  step="1"
+                  min="0"
+                  @input="newImage.width = Math.round(newImage.width || 0)"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" class="pa-1">
@@ -71,6 +79,9 @@
                   type="number"
                   outlined
                   dense
+                  step="1"
+                  min="0"
+                  @input="newImage.height = Math.round(newImage.height || 0)"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" class="pa-1">
@@ -128,18 +139,20 @@
                 <v-btn color="#333333" @click="closePopup">Zurück</v-btn>
               </v-col>
             </v-row>
-
+            <br v-if="showPreview" />
+            <br v-if="showPreview" />
             <div
               v-if="showPreview"
               class="image-preview"
-              style="overflow: scroll; scrollbar-gutter: stable"
+              style="overflow: scroll; scrollbar-gutter: stable; text-align: center"
             >
-              <br />
               <img
                 v-if="newImage.src"
-                :src="`${newImage.src}?v=${Math.random()}`"
+                :src="`${newImage.src}`"
                 alt="Vorschau"
-                :style="`object-fit: ${newImage.objectFit};`"
+                :width="`${newImage.width}`"
+                :height="`${newImage.height}`"
+                :style="`object-fit: ${newImage.objectFit};border-radius: ${newImage.border_radius}px`"
               />
               <p v-if="!newImage.src">Keine Vorschau verfügbar.</p>
             </div>
@@ -192,8 +205,8 @@ const defaultImage = {
   src: '',
   x: 0,
   y: 0,
-  width: 100,
-  height: 100,
+  width: 500,
+  height: 500,
   border_radius: 0,
   z_index: 1,
   objectFit: 'fill',
@@ -249,8 +262,8 @@ const onRightClick = (event: MouseEvent) => {
   const transform = d3.zoomTransform(svgElement)
   const svgRect = svgElement.getBoundingClientRect()
 
-  newImage.value.x = (event.clientX - svgRect.left - transform.x) / transform.k
-  newImage.value.y = (event.clientY - svgRect.top - transform.y) / transform.k
+  newImage.value.x = Math.round((event.clientX - svgRect.left - transform.x) / transform.k || 0)
+  newImage.value.y = Math.round((event.clientY - svgRect.top - transform.y) / transform.k || 0)
 
   editImageCheck.value = false
   openPopup()
@@ -327,8 +340,8 @@ const onDrop = async (event: DragEvent) => {
   const svgElement = svg.value
   const transform = d3.zoomTransform(svgElement)
   const svgRect = svgElement.getBoundingClientRect()
-  const x = (event.clientX - svgRect.left - transform.x) / transform.k
-  const y = (event.clientY - svgRect.top - transform.y) / transform.k
+  const x = Math.round((event.clientX - svgRect.left - transform.x) / transform.k || 0)
+  const y = Math.round((event.clientY - svgRect.top - transform.y) / transform.k || 0)
 
   selectedFile.value = event.dataTransfer.files[0]
   newImage.value = getDefaultImage({
