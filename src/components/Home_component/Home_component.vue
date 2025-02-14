@@ -166,7 +166,7 @@
 <script setup lang="ts">
 import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
-import { useAuthStore } from '@/stores/authStore'
+import { authStore } from '@/stores/authStore'
 import * as d3 from 'd3'
 
 /* -------------------------
@@ -181,7 +181,6 @@ let rightClickActive = false
 let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 
 const imageStore = useImageStore()
-const authStore = useAuthStore()
 const loggedIn = authStore.loggedIn
 
 const isLoading = ref(true)

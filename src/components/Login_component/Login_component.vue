@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+import { authStore } from '@/stores/authStore'
 
 const anchor = ref<HTMLElement | null>(null)
 
@@ -60,14 +60,12 @@ const loginErrorMessage = ref(false)
 const loginErrorAnimation = ref(false)
 
 const router = useRouter()
-const authStore = useAuthStore()
 
-const login = () => {
+const login = async () => {
   if (username.value === 'berlin') {
-    authStore.setPassword(password.value)
-    if (authStore.isValidLogin(username.value, password.value)) {
+    if (await authStore.login(password.value)) {
+      // Jetzt funktioniert await!
       loginErrorMessage.value = false
-      authStore.setLoginStatus(true)
       router.push('/')
     } else {
       loginErrorMessage.value = true
@@ -86,7 +84,7 @@ const login = () => {
 }
 
 const logout = () => {
-  authStore.setLoginStatus(false)
+  authStore.logout()
   password.value = ''
 }
 </script>

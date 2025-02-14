@@ -25,8 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/authStore'
-const authStore = useAuthStore()
+import { authStore } from '@/stores/authStore'
 </script>
 
 <style scoped>

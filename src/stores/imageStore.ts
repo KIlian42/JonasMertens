@@ -62,6 +62,32 @@ export const useImageStore = defineStore('image', {
       }
     },
 
+    async loadImagesFromGitHubWithAuth(token: string): Promise<boolean> {
+      this.loading = true
+      this.error = null
+      const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${Date.now()}`
+
+      try {
+        const { data } = await axios.get(url, {
+          headers: getHeaders(token), // Auth Header setzen
+        })
+
+        if (!data.content) throw new Error('Ungültige API-Antwort.')
+
+        const { images } = JSON.parse(atob(data.content))
+        if (!images) throw new Error('Keine Bilddaten gefunden.')
+
+        this.images = images
+        return true // Erfolgreich geladen ✅
+      } catch (error: any) {
+        console.error('Fehler beim Laden der JSON-Daten mit Auth:', error)
+        this.error = 'Fehler beim Laden der Bilddaten mit Auth.'
+        return false // Fehler ❌
+      } finally {
+        this.loading = false
+      }
+    },
+
     async addImage(image: {
       id?: number
       name?: string
