@@ -176,10 +176,12 @@ import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
 import { authStore } from '@/stores/authStore'
 import * as d3 from 'd3'
+import { useRouter } from 'vue-router'
 
 /* -------------------------
    Globale Variablen & Stores
 ------------------------- */
+const router = useRouter()
 const container = ref<HTMLDivElement | null>(null)
 const svg = ref<SVGElement | null>(null)
 const width = ref(0)
@@ -433,24 +435,30 @@ const renderImages = () => {
       .attr('clip-path', `url(#${clipPathId})`)
       .style('cursor', 'pointer')
       .on('click', () => {
-        // Klick wird nur verarbeitet, wenn editMode aktiv und der User eingeloggt ist
-        if (loggedIn && editMode.value) {
-          newImage.value = getDefaultImage({
-            id: img.id,
-            name: img.name,
-            src: img.src,
-            x: img.x,
-            y: img.y,
-            width: img.width,
-            height: img.height,
-            border_radius: img.border_radius,
-            z_index: img.z_index,
-            objectFit: img.objectFit,
-            title: img.title,
-            description: img.description,
-          })
-          showPopup.value = true
-          editImageCheck.value = true
+        // Falls der User eingeloggt ist:
+        if (loggedIn) {
+          if (editMode.value) {
+            // Bearbeitung: Bilddaten setzen und Popup öffnen
+            newImage.value = getDefaultImage({
+              id: img.id,
+              name: img.name,
+              src: img.src,
+              x: img.x,
+              y: img.y,
+              width: img.width,
+              height: img.height,
+              border_radius: img.border_radius,
+              z_index: img.z_index,
+              objectFit: img.objectFit,
+              title: img.title,
+              description: img.description,
+            })
+            showPopup.value = true
+            editImageCheck.value = true
+          } else {
+            // Edit-Modus ist nicht aktiv, navigiere zu /project
+            router.push('/project')
+          }
         }
       })
 
