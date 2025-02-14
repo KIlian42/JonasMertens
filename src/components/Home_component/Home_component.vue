@@ -436,29 +436,27 @@ const renderImages = () => {
       .style('cursor', 'pointer')
       .on('click', () => {
         // Falls der User eingeloggt ist:
-        if (loggedIn) {
-          if (editMode.value) {
-            // Bearbeitung: Bilddaten setzen und Popup öffnen
-            newImage.value = getDefaultImage({
-              id: img.id,
-              name: img.name,
-              src: img.src,
-              x: img.x,
-              y: img.y,
-              width: img.width,
-              height: img.height,
-              border_radius: img.border_radius,
-              z_index: img.z_index,
-              objectFit: img.objectFit,
-              title: img.title,
-              description: img.description,
-            })
-            showPopup.value = true
-            editImageCheck.value = true
-          } else {
-            // Edit-Modus ist nicht aktiv, navigiere zu /project
-            router.push('/project')
-          }
+        if (loggedIn && editMode.value) {
+          // Bearbeitung: Bilddaten setzen und Popup öffnen
+          newImage.value = getDefaultImage({
+            id: img.id,
+            name: img.name,
+            src: img.src,
+            x: img.x,
+            y: img.y,
+            width: img.width,
+            height: img.height,
+            border_radius: img.border_radius,
+            z_index: img.z_index,
+            objectFit: img.objectFit,
+            title: img.title,
+            description: img.description,
+          })
+          showPopup.value = true
+          editImageCheck.value = true
+        } else {
+          // Edit-Modus ist nicht aktiv, navigiere zu /project
+          router.push('/project')
         }
       })
 
