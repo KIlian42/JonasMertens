@@ -10,7 +10,15 @@
     <btn
       v-if="loggedIn"
       icon
-      class="add-image-button"
+      :class="['edit-mode-button', { active: editMode }]"
+      @click="updateEditMode"
+    >
+      <v-icon size="80">mdi-pencil-circle</v-icon>
+    </btn>
+    <btn
+      v-if="loggedIn"
+      icon
+      :class="['add-image-button', { active: addImageMode }]"
       @click="
         (() => {
           editImageCheck = false
@@ -18,10 +26,10 @@
         })()
       "
     >
-      <v-icon size="62">mdi-plus-circle</v-icon>
+      <v-icon size="80">mdi-plus-circle</v-icon>
     </btn>
 
-    <v-dialog v-model="showPopup" max-width="800">
+    <v-dialog v-model="showPopup" max-width="800" @click:outside="closePopup">
       <v-card class="popup-card">
         <v-card-title v-if="!editImageCheck" class="text-h6">Bild hinzufügen</v-card-title>
         <v-card-title v-else class="text-h6">Bild bearbeiten</v-card-title>
@@ -220,6 +228,8 @@ function getDefaultImage(overrides = {}) {
 /* -------------------------
    Zustandsvariablen
 ------------------------- */
+const addImageMode = ref(false)
+const editMode = ref(false)
 const showPopup = ref(false)
 const editImageCheck = ref(false)
 const showPreview = ref(true)
@@ -272,13 +282,19 @@ const updateShowPreview = () => {
   showPreview.value = !showPreview.value
 }
 
+const updateEditMode = () => {
+  editMode.value = !editMode.value
+}
+
 const openPopup = () => {
   showPopup.value = true
+  addImageMode.value = true
 }
 
 const closePopup = () => {
   console.log('close Popup')
   showPopup.value = false
+  addImageMode.value = false
   selectedFile.value = null
   newImage.value = getDefaultImage()
 }
@@ -371,6 +387,7 @@ const renderImages = () => {
       .replace(/'/g, '&#039;')
 
   images.value.forEach((img, index) => {
+    // Haupt-Gruppe für alle Elemente des Bildes (Bild, Rahmen, Text)
     const group = mainContainer.append('g').attr('class', 'image-group')
     const clipPathId = `clip-path-${index}`
 
@@ -386,8 +403,11 @@ const renderImages = () => {
       .attr('rx', img.border_radius ?? 20)
       .attr('ry', img.border_radius ?? 20)
 
-    // Rahmen (zur Hervorhebung beim Mouseover)
-    const border = group
+    // Erstelle eine Untergruppe für Bild und Rahmen, die den Skalierungseffekt erhält
+    const imageContainer = group.append('g').attr('class', 'image-container')
+
+    // Rahmen (zur Hervorhebung beim Mouseover) – nur sichtbar, wenn editMode aktiv ist
+    const border = imageContainer
       .append('rect')
       .attr('x', img.x)
       .attr('y', img.y)
@@ -397,11 +417,11 @@ const renderImages = () => {
       .attr('ry', img.border_radius ?? 20)
       .attr('fill', 'none')
       .attr('stroke', 'orange')
-      .attr('stroke-width', 10)
+      .attr('stroke-width', 5)
       .style('opacity', 0)
 
     // Bild hinzufügen und den ClipPath anwenden
-    group
+    imageContainer
       .append('image')
       .attr('x', img.x)
       .attr('y', img.y)
@@ -412,10 +432,9 @@ const renderImages = () => {
       .attr('preserveAspectRatio', 'none')
       .attr('clip-path', `url(#${clipPathId})`)
       .style('cursor', 'pointer')
-      .on('mouseover', () => border.style('opacity', 1))
-      .on('mouseout', () => border.style('opacity', 0))
       .on('click', () => {
-        if (loggedIn) {
+        // Klick wird nur verarbeitet, wenn editMode aktiv und der User eingeloggt ist
+        if (loggedIn && editMode.value) {
           newImage.value = getDefaultImage({
             id: img.id,
             name: img.name,
@@ -435,7 +454,33 @@ const renderImages = () => {
         }
       })
 
-    // Überschrift (Titel) als HTML-Element in foreignObject einbetten
+    // Berechne den Mittelpunkt des Bildes für eine zentrierte Skalierung
+    const cx = img.x + img.width / 2
+    const cy = img.y + img.height / 2
+
+    // Event-Listener für den Skalierungseffekt
+    imageContainer
+      .on('mouseover', function () {
+        // Skalierung mit Translation, damit der Mittelpunkt erhalten bleibt
+        d3.select(this)
+          .transition()
+          .duration(300)
+          .attr('transform', `translate(${cx}, ${cy}) scale(1.03) translate(${-cx}, ${-cy})`)
+        // Zeige den Rahmen nur, wenn editMode aktiv ist
+        if (editMode.value) {
+          border.transition().duration(300).style('opacity', 1)
+        }
+      })
+      .on('mouseout', function () {
+        d3.select(this).transition().duration(300).attr('transform', '')
+        // Blende den Rahmen nur aus, wenn editMode aktiv ist
+        if (editMode.value) {
+          border.transition().duration(300).style('opacity', 0)
+        }
+      })
+
+    // Überschrift (Titel) als HTML-Element in foreignObject einbetten (außerhalb imageContainer,
+    // damit diese nicht skaliert werden)
     group
       .append('foreignObject')
       .attr('x', img.x)
@@ -454,7 +499,7 @@ const renderImages = () => {
         </html>
       `)
 
-    // Beschreibung als HTML-Element in foreignObject einbetten
+    // Beschreibung als HTML-Element in foreignObject einbetten (ebenfalls außerhalb imageContainer)
     group
       .append('foreignObject')
       .attr('x', img.x)

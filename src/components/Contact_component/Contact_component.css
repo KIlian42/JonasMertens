@@ -30,9 +30,10 @@
   bottom: 15px;
   font-size: 25px;
   color: black;
+  transition: transform 0.3s ease;
 }
 .corner-element:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
 .container {
@@ -43,11 +44,12 @@
 
 .highlight-text {
   display: inline-block;
+  transition: transform 0.3s ease;
 }
 .highlight-text:hover {
   cursor: pointer;
   text-decoration: underline;
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 a {

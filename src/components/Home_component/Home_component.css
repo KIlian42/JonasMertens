@@ -13,25 +13,46 @@
   height: 100%;
   touch-action: none;
 }
+
+.edit-mode-button,
 .add-image-button {
-  width: 50px;
-  height: 50px;
+  width: 60px; /* gleiche Breite wie das Icon */
+  height: 60px; /* gleiche Höhe wie das Icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Kreisförmiger Button */
+  background-color: white;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  overflow: hidden; /* verhindert, dass Inhalte seitlich überlaufen */
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease;
+}
+
+.edit-mode-button {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  color: #10142f;
-  border-radius: 50%; /* Kreisförmiger Button */
-  display: flex; /* Icon-Zentrierung */
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6); /* Optionaler Schatten für bessere Sichtbarkeit */
-  cursor: pointer;
-  background-color: white;
 }
 
+.add-image-button {
+  position: absolute;
+  bottom: 20px;
+  right: 100px;
+}
+
+.edit-mode-button:hover,
 .add-image-button:hover {
   transform: scale(1.05);
-  background-color: #fbbe0e;
+  background: linear-gradient(70deg, #ff0000, #ff7f00, #ffff00, lightgreen, #0000ff);
+}
+
+/* Dauerhaft aktiver Zustand */
+.edit-mode-button.active,
+.add-image-button.active {
+  background: linear-gradient(70deg, #ff0000, #ff7f00, #ffff00, lightgreen, #0000ff);
 }
 
 .popup {
