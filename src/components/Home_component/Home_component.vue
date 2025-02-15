@@ -130,21 +130,40 @@
                   dense
                 ></v-select>
               </v-col>
+              <v-col cols="12" sm="6" class="pa-1">
+                <v-switch
+                  v-model="newImage.visible"
+                  :label="newImage.visible ? 'Öffentlich' : 'Privat'"
+                  dense
+                  :color="newImage.visible ? 'green' : 'red'"
+                  :class="newImage.visible ? 'switch-true' : 'switch-false'"
+                ></v-switch>
+              </v-col>
+              <v-col cols="12" sm="6" class="pa-1">
+                <v-switch
+                  v-model="newImage.project_page"
+                  :label="newImage.project_page ? 'Projektseite' : 'Keine Projektseite'"
+                  dense
+                  :color="newImage.project_page ? 'green' : 'red'"
+                  :class="newImage.project_page ? 'switch-true' : 'switch-false'"
+                ></v-switch>
+              </v-col>
             </v-row>
-
+            <hr />
+            <br />
             <v-row>
               <v-col sm="6" md="3" class="d-flex justify-center">
                 <v-btn color="#333333" @click="deleteImage" v-if="editImageCheck">Löschen</v-btn>
-              </v-col>
-              <v-col sm="6" md="3" class="d-flex justify-center">
-                <v-btn color="#333333" @click="updateShowPreview">Vorschau</v-btn>
               </v-col>
               <v-col sm="6" md="3" class="d-flex justify-center">
                 <v-btn color="#333333" @click="editImage" v-if="editImageCheck">Anwenden</v-btn>
                 <v-btn color="#333333" @click="addImage" v-else>Anwenden</v-btn>
               </v-col>
               <v-col sm="6" md="3" class="d-flex justify-center">
-                <v-btn color="#333333" @click="closePopup">Zurück</v-btn>
+                <v-btn color="#333333" @click="updateShowPreview">Vorschau</v-btn>
+              </v-col>
+              <v-col sm="6" md="3" class="d-flex justify-center">
+                <v-btn color="#333333" @click="closePopup">Abbrechen</v-btn>
               </v-col>
             </v-row>
             <br v-if="showPreview" />
@@ -221,6 +240,8 @@ const defaultImage = {
   objectFit: 'fill',
   title: '',
   description: '',
+  project_page: false,
+  visible: true,
 }
 
 function getDefaultImage(overrides = {}) {
@@ -451,6 +472,8 @@ const renderImages = () => {
             objectFit: img.objectFit,
             title: img.title,
             description: img.description,
+            project_page: img.project_page,
+            visible: img.visible,
           })
           showPopup.value = true
           editImageCheck.value = true

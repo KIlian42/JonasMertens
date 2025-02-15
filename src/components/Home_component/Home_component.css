@@ -46,7 +46,6 @@
 .edit-mode-button:hover,
 .add-image-button:hover {
   transform: scale(1.05);
-  background: linear-gradient(70deg, #ff0000, #ff7f00, #ffff00, lightgreen, #0000ff);
 }
 
 /* Dauerhaft aktiver Zustand */
@@ -69,4 +68,12 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.switch-true {
+  color: green;
+}
+
+.switch-false {
+  color: red;
 }

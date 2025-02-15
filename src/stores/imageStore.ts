@@ -33,6 +33,8 @@ export const useImageStore = defineStore('image', {
       objectFit: string
       title: string
       description: string
+      project_page: boolean
+      visible: boolean
     }>,
     loading: false,
     error: null as string | null,
@@ -101,6 +103,8 @@ export const useImageStore = defineStore('image', {
       objectFit: string
       title: string
       description: string
+      project_page: boolean
+      visible: boolean
     }) {
       const authStore = useAuthStore()
       // Hier wird der PAT aus "password" verwendet
@@ -169,6 +173,8 @@ export const useImageStore = defineStore('image', {
       objectFit?: string
       title?: string
       description?: string
+      project_page: boolean
+      visible: boolean
     }) {
       const authStore = useAuthStore()
       const token = authStore.password
