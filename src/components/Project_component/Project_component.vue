@@ -15,22 +15,6 @@
       <v-icon class="add" v-if="!bild">mdi-plus-circle</v-icon>
       <img v-else :src="bild" alt="Dropped image" class="uploaded-image" />
     </v-row>
-    <v-row
-      no-gutters
-      class="pa-0 ma-0 rowelement"
-      @mousedown="isPressed = true"
-      @mouseup="isPressed = false"
-      @mouseleave="isPressed = false"
-      :class="{ pressed: isPressed, dragging: isDragging }"
-      @dragover.prevent="onDragOver"
-      @dragleave="onDragLeave"
-      @drop="onDrop"
-      @click="selectImage"
-    >
-      <v-icon class="add" v-if="!bild">mdi-plus-circle</v-icon>
-      <img v-else :src="bild" alt="Dropped image" class="uploaded-image" />
-    </v-row>
-
     <!-- Verstecktes Input-Feld -->
     <input
       type="file"
@@ -44,6 +28,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { globalStore } from '@/stores/globalStore'
+
+const current_project = ref(globalStore.getCurrentProjectPage)
 
 const isPressed = ref(false)
 const isDragging = ref(false)

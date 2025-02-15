@@ -43,7 +43,7 @@
               outlined
               dense
             ></v-file-input>
-
+            <br />
             <v-row>
               <v-col cols="12" sm="6" class="pa-1">
                 <v-text-field
@@ -194,6 +194,7 @@
 import { onMounted, ref, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
 import { authStore } from '@/stores/authStore'
+import { projectStore } from '@/stores/projectStore'
 import * as d3 from 'd3'
 import { useRouter } from 'vue-router'
 
@@ -479,6 +480,7 @@ const renderImages = () => {
           editImageCheck.value = true
         } else {
           // Edit-Modus ist nicht aktiv, navigiere zu /project
+          projectStore.setCurrentProjectPage(img.id ? img.id : 0)
           router.push('/project')
         }
       })
