@@ -310,6 +310,7 @@ const updateShowPreview = () => {
 
 const updateEditMode = () => {
   editMode.value = !editMode.value
+  renderImages()
 }
 
 const openPopup = () => {
@@ -419,6 +420,9 @@ const renderImages = () => {
       .replace(/'/g, '&#039;')
 
   images.value.forEach((img, index) => {
+    // Bestimme, ob Interaktivität gewünscht ist
+    const isInteractive = img.project_page || editMode.value
+
     // Haupt-Gruppe für alle Elemente des Bildes (Bild, Rahmen, Text)
     const group = mainContainer.append('g').attr('class', 'image-group')
     const clipPathId = `clip-path-${index}`
@@ -463,7 +467,8 @@ const renderImages = () => {
       .attr('alt', img.description)
       .attr('preserveAspectRatio', 'none')
       .attr('clip-path', `url(#${clipPathId})`)
-      .style('cursor', 'pointer')
+      // Setze den Cursor nur, wenn Interaktivität gewünscht ist
+      .style('cursor', isInteractive ? 'pointer' : 'default')
       .on('click', () => {
         // Falls der User eingeloggt ist:
         if (loggedIn && editMode.value) {
@@ -487,9 +492,11 @@ const renderImages = () => {
           showPopup.value = true
           editImageCheck.value = true
         } else {
-          // Edit-Modus ist nicht aktiv, navigiere zu /project
-          projectStore.setCurrentProjectPage(img.id ? img.id : 0)
-          router.push('/project')
+          if (img.project_page) {
+            // Edit-Modus ist nicht aktiv, navigiere zu /project
+            projectStore.setCurrentProjectPage(img.id ? img.id : 0)
+            router.push('/project')
+          }
         }
       })
 
@@ -497,29 +504,30 @@ const renderImages = () => {
     const cx = img.x + img.width / 2
     const cy = img.y + img.height / 2
 
-    // Event-Listener für den Skalierungseffekt
-    imageContainer
-      .on('mouseover', function () {
-        // Skalierung mit Translation, damit der Mittelpunkt erhalten bleibt
-        d3.select(this)
-          .transition()
-          .duration(300)
-          .attr('transform', `translate(${cx}, ${cy}) scale(1.03) translate(${-cx}, ${-cy})`)
-        // Zeige den Rahmen nur, wenn editMode aktiv ist
-        if (editMode.value) {
-          border.transition().duration(300).style('opacity', 1)
-        }
-      })
-      .on('mouseout', function () {
-        d3.select(this).transition().duration(300).attr('transform', '')
-        // Blende den Rahmen nur aus, wenn editMode aktiv ist
-        if (editMode.value) {
-          border.transition().duration(300).style('opacity', 0)
-        }
-      })
+    // Füge den Skalierungseffekt nur hinzu, wenn isInteractive true ist
+    if (isInteractive) {
+      imageContainer
+        .on('mouseover', function () {
+          // Skalierung mit Translation, damit der Mittelpunkt erhalten bleibt
+          d3.select(this)
+            .transition()
+            .duration(300)
+            .attr('transform', `translate(${cx}, ${cy}) scale(1.03) translate(${-cx}, ${-cy})`)
+          // Zeige den Rahmen nur, wenn editMode aktiv ist
+          if (editMode.value) {
+            border.transition().duration(300).style('opacity', 1)
+          }
+        })
+        .on('mouseout', function () {
+          d3.select(this).transition().duration(300).attr('transform', '')
+          // Blende den Rahmen nur aus, wenn editMode aktiv ist
+          if (editMode.value) {
+            border.transition().duration(300).style('opacity', 0)
+          }
+        })
+    }
 
-    // Überschrift (Titel) als HTML-Element in foreignObject einbetten (außerhalb imageContainer,
-    // damit diese nicht skaliert werden)
+    // Überschrift (Titel) als HTML-Element in foreignObject einbetten
     group
       .append('foreignObject')
       .attr('x', img.x)
@@ -528,17 +536,17 @@ const renderImages = () => {
       .attr('height', 40)
       .append('xhtml:div')
       .attr('xmlns', 'http://www.w3.org/1999/xhtml').html(`
-        <html>
-          <head>
-            <meta charset="UTF-8" />
-          </head>
-          <body style="margin:0; font-size:16px; font-weight:bold; color:#000; line-height:1.2;">
-            <p style="margin:0;">${escapeHTML(img.title)}</p>
-          </body>
-        </html>
-      `)
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+        </head>
+        <body style="margin:0; font-size:16px; font-weight:bold; color:#000; line-height:1.2;">
+          <p style="margin:0;">${escapeHTML(img.title)}</p>
+        </body>
+      </html>
+    `)
 
-    // Beschreibung als HTML-Element in foreignObject einbetten (ebenfalls außerhalb imageContainer)
+    // Beschreibung als HTML-Element in foreignObject einbetten
     group
       .append('foreignObject')
       .attr('x', img.x)
@@ -547,15 +555,15 @@ const renderImages = () => {
       .attr('height', 1000)
       .append('xhtml:div')
       .attr('xmlns', 'http://www.w3.org/1999/xhtml').html(`
-        <html>
-          <head>
-            <meta charset="UTF-8" />
-          </head>
-          <body style="margin:0; font-size:14px; color:#333; line-height:1.2;">
-            <p style="margin:0;">${escapeHTML(img.description)}</p>
-          </body>
-        </html>
-      `)
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+        </head>
+        <body style="margin:0; font-size:14px; color:#333; line-height:1.2;">
+          <p style="margin:0;">${escapeHTML(img.description)}</p>
+        </body>
+      </html>
+    `)
   })
 }
 
