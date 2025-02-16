@@ -156,8 +156,8 @@
                 <v-btn color="#333333" @click="deleteImage" v-if="editImageCheck">Löschen</v-btn>
               </v-col>
               <v-col sm="6" md="3" class="d-flex justify-center">
-                <v-btn color="#333333" @click="editImage" v-if="editImageCheck">Anwenden</v-btn>
-                <v-btn color="#333333" @click="addImage" v-else>Anwenden</v-btn>
+                <v-btn color="#333333" @click="editImage" v-if="editImageCheck">Speichern</v-btn>
+                <v-btn color="#333333" @click="addImage" v-else>Speichern</v-btn>
               </v-col>
               <v-col sm="6" md="3" class="d-flex justify-center">
                 <v-btn color="#333333" @click="updateShowPreview">Vorschau</v-btn>
