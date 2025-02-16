@@ -24,6 +24,13 @@
         </v-col>
       </v-row>
     </template>
+    <div class="addButton">
+      <div class="addButtonInner">
+        <div class="add-image-button">
+          <v-icon size="61" class="add">mdi-plus-circle</v-icon>
+        </div>
+      </div>
+    </div>
   </v-container>
 </template>
 
@@ -45,4 +52,41 @@ loadImages()
 
 <style scoped>
 @import url('./Project_component.css');
+
+.addButton {
+  width: 100%;
+  height: 150px;
+  padding: 20px 20px;
+}
+
+.addButtonInner {
+  width: 100%;
+  height: 100%;
+  border: solid black 1px;
+  border-radius: 50px;
+  transition: ease 0.3s;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6);
+}
+
+.addButtonInner:hover {
+  transform: scale(1.01);
+  cursor: pointer;
+  .add-image-button {
+    background: linear-gradient(70deg, #ff0000, #ff7f00, #ffff00, lightgreen, #0000ff);
+  }
+}
+
+.add-image-button {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: white;
+}
 </style>
