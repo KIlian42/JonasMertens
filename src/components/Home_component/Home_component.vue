@@ -6,6 +6,7 @@
     @dragover.prevent
     @drop="onDrop"
   >
+    <Loading_component v-show="isLoading"></Loading_component>
     <svg ref="svg" class="map-container"></svg>
     <btn
       v-if="loggedIn"
@@ -197,6 +198,7 @@ import { authStore } from '@/stores/authStore'
 import { projectStore } from '@/stores/projectStore'
 import * as d3 from 'd3'
 import { useRouter } from 'vue-router'
+import Loading_component from '../Loading_component/Loading_component.vue'
 
 /* -------------------------
    Globale Variablen & Stores
@@ -333,6 +335,7 @@ const onFileChange = (event: Event) => {
 
 const addImage = async () => {
   if (selectedFile.value) {
+    isLoading.value = true
     const imageName = `image_${Date.now()}.${selectedFile.value.name.split('.').pop()}`
     const reader = new FileReader()
 
@@ -346,14 +349,17 @@ const addImage = async () => {
       closePopup()
     }
     reader.readAsDataURL(selectedFile.value)
+    isLoading.value = false
   }
 }
 
 const editImage = async () => {
   try {
+    isLoading.value = true
     await imageStore.editImage({ ...newImage.value })
     await imageStore.loadImagesFromGitHub()
     renderImages()
+    isLoading.value = false
     closePopup()
   } catch (error) {
     console.error('Fehler beim Bearbeiten des Bildes:', error)
@@ -362,9 +368,11 @@ const editImage = async () => {
 
 const deleteImage = async () => {
   try {
+    isLoading.value = true
     await imageStore.deleteImage(newImage.value.id)
     await imageStore.loadImagesFromGitHub()
     renderImages()
+    isLoading.value = false
     closePopup()
   } catch (error) {
     console.error('Fehler beim Bearbeiten des Bildes:', error)
