@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="editMenu" :class="{ open: editMenuOpen }">
-      <v-select
+      <!-- <v-select
         v-model="anzahl"
         :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
         label="Anzahl Spalten"
@@ -40,7 +40,7 @@
         dense
         @change="updateAnzahl"
       ></v-select>
-      <v-select v-model="indexSpalte" :items="selectItems" label="Spalte" outlined dense></v-select>
+      <v-select v-model="indexSpalte" :items="selectItems" label="Spalte" outlined dense></v-select> -->
     </div>
   </v-container>
 </template>
