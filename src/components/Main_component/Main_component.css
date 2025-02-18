@@ -2,15 +2,15 @@
   position: relative;
   width: 100vw;
   height: 100dvh;
-  /* padding-top: 70px;
-  overflow: auto; */
+  padding-top: 70px;
+  overflow: auto;
 }
 
 .mainfullscreen {
   position: relative;
   width: 100vw;
   height: 100vh;
-  /* padding-left: 20vw; */
+  padding-left: 20vw;
 }
 
 .fade-enter-active,
