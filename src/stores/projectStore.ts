@@ -39,6 +39,7 @@ export const useProjectStore = defineStore('project', {
     },
 
     async loadImagesFromGitHub() {
+      this.images = []
       this.loading = true
       this.error = null
       const url = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${Date.now()}`
