@@ -24,7 +24,16 @@
         </v-col>
       </v-row>
     </template>
-    <div class="addButton">
+    <div
+      v-show="editMenuOpen"
+      style="
+        height: 300px;
+        background-color: #ebeaea;
+        border-bottom: solid 1px black;
+        border-top: solid 1px black;
+      "
+    ></div>
+    <div v-show="!editMenuOpen" class="addButton">
       <div class="addButtonInner">
         <div class="addRowButton" @click="updateEditMenuOpen">
           <v-icon size="61" class="add">mdi-plus-circle</v-icon>
@@ -68,6 +77,13 @@ const editMenuOpen = ref<boolean>(false)
 
 const updateEditMenuOpen = () => {
   editMenuOpen.value = !editMenuOpen.value
+  // Warte 300ms, bis das Menü animiert oder gerendert wurde
+  setTimeout(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth', // Optional: sanfter Übergang
+    })
+  }, 250)
 }
 </script>
 
@@ -113,13 +129,13 @@ const updateEditMenuOpen = () => {
 
 .editMenu {
   position: relative;
-  background-color: #45bbe2;
+  background: linear-gradient(to right, #0065a9, #7fa9c2 30%, #7fa9c2 70%, #0065a9);
   bottom: 0;
   height: 0;
   width: 100%;
   overflow: hidden;
   transition: height 0.3s ease;
-  border-top: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .editMenu.open {

@@ -7,6 +7,9 @@
     @drop="onDrop"
   >
     <Loading_component v-show="isLoading"></Loading_component>
+    <div class="hand-wrapper" v-show="swipeHint">
+      <v-icon size="300" class="hand-icon"> mdi-gesture-tap </v-icon>
+    </div>
     <svg ref="svg" class="map-container"></svg>
     <btn
       v-if="loggedIn"
@@ -215,6 +218,7 @@ let mainContainer: d3.Selection<SVGGElement, unknown, null, undefined>
 const imageStore = useImageStore()
 const loggedIn = authStore.loggedIn
 
+const swipeHint = ref(false)
 const isLoading = ref(true)
 const images = computed(() => imageStore.getImages)
 const loadImages = async () => {
@@ -608,6 +612,13 @@ onMounted(() => {
     window.addEventListener('resize', updateSize)
     window.addEventListener('mouseup', handleMouseUp)
   })
+  setTimeout(() => {
+    swipeHint.value = true
+    // Nach weiteren 3 Sekunden wieder auf false setzen
+    setTimeout(() => {
+      swipeHint.value = false
+    }, 3000)
+  }, 1000)
 })
 
 onBeforeUnmount(() => {
