@@ -24,15 +24,24 @@
         </v-col>
       </v-row>
     </template>
-    <div
-      v-show="editMenuOpen"
-      style="
-        height: 300px;
-        background-color: #ebeaea;
-        border-bottom: solid 1px black;
-        border-top: solid 1px black;
-      "
-    ></div>
+    <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0" style="background-color: #ebeaea">
+      <v-row class="ma-0 pa-0">
+        <v-col
+          class="ma-0"
+          v-for="(_, index) in anzahl"
+          :key="index"
+          :cols="colSize"
+          style="
+            border: 1px solid black;
+            height: auto;
+            box-sizing: border-box;
+            padding: 20px important!;
+          "
+        >
+          <div style="height: 300px; background-color: red; border-radius: 20px">Hallo</div>
+        </v-col>
+      </v-row>
+    </v-container>
     <div v-show="!editMenuOpen" class="addButton">
       <div class="addButtonInner">
         <div class="addRowButton" @click="updateEditMenuOpen">
@@ -41,15 +50,103 @@
       </div>
     </div>
     <div class="editMenu" :class="{ open: editMenuOpen }">
-      <!-- <v-select
-        v-model="anzahl"
-        :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
-        label="Anzahl Spalten"
-        outlined
-        dense
-        @change="updateAnzahl"
-      ></v-select>
-      <v-select v-model="indexSpalte" :items="selectItems" label="Spalte" outlined dense></v-select> -->
+      <v-row class="ma-0 pa-0">
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-select
+            v-model="anzahl"
+            :items="[1, 2, 3, 4]"
+            label="Anzahl Spalten"
+            outlined
+            dense
+          ></v-select>
+        </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-select
+            v-model="selectedColumn"
+            :items="columnItems"
+            label="Ausgewählte Spalte"
+            outlined
+            dense
+          ></v-select>
+        </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-text-field
+            v-model.number="width[selectedColumn]"
+            label="Breite"
+            type="number"
+            outlined
+            dense
+            step="1"
+            min="0"
+            @input="width[selectedColumn] = Math.round(width[selectedColumn] || 0)"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-text-field
+            v-model.number="height[selectedColumn]"
+            label="Höhe"
+            type="number"
+            outlined
+            dense
+            step="1"
+            min="0"
+            @input="height[selectedColumn] = Math.round(height[selectedColumn] || 0)"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-text-field
+            v-model.number="padding[selectedColumn]"
+            label="Abstand"
+            type="number"
+            outlined
+            dense
+            step="1"
+            min="0"
+            @input="padding[selectedColumn] = Math.round(padding[selectedColumn] || 0)"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-text-field
+            v-model.number="borderRadius[selectedColumn]"
+            label="Gerundete Ecken"
+            type="number"
+            outlined
+            dense
+            step="1"
+            min="0"
+            @input="borderRadius[selectedColumn] = Math.round(borderRadius[selectedColumn] || 0)"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="6" class="pa-1">
+          <v-text-field v-model="title[selectedColumn]" label="Titel" outlined dense></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="6" class="pa-1">
+          <v-text-field
+            v-model="description[selectedColumn]"
+            label="Bildbeschreibung"
+            outlined
+            dense
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="6" class="pa-1">
+          <v-select
+            v-model="fitOption[selectedColumn]"
+            :items="['fill', 'contain', 'cover']"
+            label="Fit-Option"
+            outlined
+            dense
+          ></v-select>
+        </v-col>
+        <v-col cols="12" sm="6" class="pa-1">
+          <v-select
+            v-model="visible[selectedColumn]"
+            :items="['true', 'false']"
+            label="Sichtbar"
+            outlined
+            dense
+          ></v-select>
+        </v-col>
+      </v-row>
     </div>
   </v-container>
 </template>
@@ -58,6 +155,26 @@
 import { ref, computed, onMounted } from 'vue'
 import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
+
+const width = ref([0, 0, 0, 0])
+const height = ref([0, 0, 0, 0])
+const padding = ref([0, 0, 0, 0])
+const borderRadius = ref([0, 0, 0, 0])
+const title = ref(['', '', '', ''])
+const description = ref(['', '', '', ''])
+const fitOption = ref(['fill', 'fill', 'fill', 'fill'])
+const visible = ref([true, true, true, true])
+const anzahl = ref(1)
+const colSize = computed(() => Math.floor(12 / anzahl.value))
+const selectedColumn = ref(1)
+const columnItems = computed(() => {
+  const items = []
+  // Erstelle ein Array mit Werten von 1 bis anzahl
+  for (let i = 1; i <= anzahl.value; i++) {
+    items.push(i)
+  }
+  return items
+})
 
 const isLoading = ref(true)
 
@@ -89,56 +206,4 @@ const updateEditMenuOpen = () => {
 
 <style scoped>
 @import url('./Project_component.css');
-
-.addButton {
-  width: 100%;
-  height: 150px;
-  padding: 20px 20px;
-}
-
-.addButtonInner {
-  width: 100%;
-  height: 100%;
-  border: solid black 1px;
-  border-radius: 50px;
-  transition: ease 0.3s;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6);
-}
-
-.addButtonInner:hover {
-  transform: scale(1.01);
-  cursor: pointer;
-  .addRowButton {
-    background: linear-gradient(70deg, #ff0000, #ff7f00, #ffff00, lightgreen, #0000ff);
-  }
-}
-
-.addRowButton {
-  position: relative;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: white;
-}
-
-.editMenu {
-  position: relative;
-  background: linear-gradient(to right, #0065a9, #7fa9c2 30%, #7fa9c2 70%, #0065a9);
-  bottom: 0;
-  height: 0;
-  width: 100%;
-  overflow: hidden;
-  transition: height 0.3s ease;
-  border-bottom: 1px solid black;
-}
-
-.editMenu.open {
-  height: 200px;
-}
 </style>
