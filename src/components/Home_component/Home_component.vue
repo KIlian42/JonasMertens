@@ -7,7 +7,7 @@
     @drop="onDrop"
   >
     <Loading_component v-show="isLoading"></Loading_component>
-    <div class="hand-wrapper" v-show="swipeHint">
+    <div class="hand-wrapper" v-show="false">
       <v-icon size="300" class="hand-icon"> mdi-gesture-tap </v-icon>
     </div>
     <svg ref="svg" class="map-container"></svg>

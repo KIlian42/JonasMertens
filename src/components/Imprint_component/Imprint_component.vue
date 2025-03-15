@@ -11,7 +11,10 @@
       <br />
       Telefon: XXXXXXXXXX
       <br />
-      E-Mail: maxmustermann@example.com
+      E-Mail:
+      <a class="highlight-text" href="mailto:jonas.l.mertens@gmail.com"
+        >jonas.l.mertens@gmail.com</a
+      >
       <br /><br />
       <b>Umsatzsteuer-Identifikationsnummer:</b>
       <br />
@@ -26,12 +29,9 @@
       Es gelten folgende berufsrechtliche Regelungen: EU-Streitschlichtung
       <br />
       Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-      <br />
-      <a href="https://ec.europa.eu/consumers/odr/" target="_blank">
+      <a class="highlight-text" href="https://ec.europa.eu/consumers/odr/" target="_blank">
         https://ec.europa.eu/consumers/odr/</a
       >
-      <br />
-      Unsere E-Mail-Adresse finden Sie oben im Impressum.
       <br /><br />
     </div>
   </div>

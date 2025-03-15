@@ -29,3 +29,13 @@ a {
   left: 0;
   pointer-events: none;
 }
+
+.highlight-text {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+.highlight-text:hover {
+  cursor: pointer;
+  text-decoration: underline;
+  transform: scale(1.04);
+}

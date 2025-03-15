@@ -1,9 +1,18 @@
 <template>
   <div class="center-content">
     <div class="textbox">
-      Anfragen: maxmustermann@example.com
+      Anfragen:
+      <a class="highlight-text" href="mailto:jonas.l.mertens@gmail.com"
+        >jonas.l.mertens@gmail.com</a
+      >
       <br />
-      Instagram: @maxmustermann
+      Instagram:
+      <a
+        class="highlight-text"
+        target="_blank"
+        href="https://www.instagram.com/jonas.l.mertens/?hl=de"
+        >jonas.l.mertens</a
+      >
       <br />
       <div class="container">
         <RouterLink to="/privacypolicy">

@@ -7,9 +7,9 @@
           v-for="(img, colIndex) in rowImages"
           :key="`col-${rowIndex}-${colIndex}`"
           cols="12"
-          :lg="12 / rowImages.length"
           md="6"
           sm="12"
+          :lg="12 / rowImages.length"
           class="colelement"
         >
           <v-container fluid class="element">
@@ -27,15 +27,17 @@
     <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0">
       <v-row class="ma-0 pa-0">
         <v-col
+          sm="12"
+          md="6"
+          :lg="12 / anzahl"
           class="ma-0 pa-0"
           v-for="(_, index) in anzahl"
           :key="index"
           :cols="colSize"
-          style="border-bottom: 1px solid black; height: auto; overflow: scroll"
-          :style="{ 'border-right': index !== anzahl - 1 ? '1px solid black' : '' }"
+          style="height: auto"
         >
           <div
-            style="display: flex; align-items: center; justify-content: center; overflow: scroll"
+            style="display: flex; align-items: center; justify-content: center"
             :style="{ padding: allPadding[index] + 'px' }"
           >
             <div
@@ -155,7 +157,7 @@
             "
           ></v-text-field>
         </v-col>
-        <v-col cols="12" sm="6" class="pa-1">
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-text-field
             v-model="allTitle[selectedColumn - 1]"
             label="Titel"
@@ -163,7 +165,7 @@
             dense
           ></v-text-field>
         </v-col>
-        <v-col cols="12" sm="6" class="pa-1">
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-text-field
             v-model="allDescription[selectedColumn - 1]"
             label="Bildbeschreibung"
@@ -171,7 +173,7 @@
             dense
           ></v-text-field>
         </v-col>
-        <v-col cols="12" sm="6" class="pa-1">
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-select
             v-model="allFitOption[selectedColumn - 1]"
             :items="['Angepasst', 'Vollständig', 'Gefüllt']"
@@ -180,13 +182,14 @@
             dense
           ></v-select>
         </v-col>
-        <v-col cols="12" sm="6" class="pa-1">
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-select
             v-model="allVisible[selectedColumn - 1]"
             :items="['Ja', 'Nein']"
             label="Sichtbar"
             outlined
             dense
+            disabled
           ></v-select>
         </v-col>
       </v-row>
@@ -202,7 +205,7 @@ import Loading_component from '../Loading_component/Loading_component.vue'
 const allWidth = ref([600, 600, 600, 600])
 const allHeight = ref([600, 600, 600, 600])
 const allPadding = ref([10, 10, 10, 10])
-const allBorderRadius = ref([0, 0, 0, 0])
+const allBorderRadius = ref([10, 10, 10, 10])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
 const allFitOption = ref(['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst'])
@@ -216,6 +219,7 @@ const columnItems = computed(() => {
   for (let i = 1; i <= anzahl.value; i++) {
     items.push(i)
   }
+  items.push('Alle')
   return items
 })
 const imgurls = ref(['', '', ''])

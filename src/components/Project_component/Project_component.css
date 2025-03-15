@@ -76,13 +76,13 @@
 
 .editMenu {
   position: relative;
-  background: linear-gradient(to bottom, #fdf6e3, #e5dfcf);
+  background: linear-gradient(20deg, #e0dfdf, #e1dac6);
   bottom: 0;
   height: 0;
   width: 100%;
   overflow: hidden;
   transition: height 0.3s ease;
-  border-bottom: 1px solid black;
+  border-top: 1px solid black;
 }
 
 .editMenu.open {
@@ -93,7 +93,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: red;
+  background: url('/addImage.jpg') no-repeat center center;
+  background-size: cover;
   border-radius: 20px;
   font-size: 20px;
 }

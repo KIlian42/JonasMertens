@@ -85,11 +85,12 @@
       reibungslosen Bereitstellung unserer Dienste. Sofern die Setzung anderer Cookies (z.B. für
       Analyse-Funktionen) erfolgt, werden diese in dieser Datenschutzerklärung separat behandelt.
       <br /><br />
-
-      Bei weiteren fragen wenden Sie sich bitte an den Entwickler dieser Webseite:
-      <a class="highlight-text" target="”_blank”" href="https://www.kiliankramer.com"
-        >Kilian Kramer</a
-      >.
+      <b>
+        Bei weiteren Fragen, wenden Sie sich bitte an den Entwickler dieser Webseite:
+        <a class="highlight-text" target="”_blank”" href="https://www.kiliankramer.com"
+          >Kilian Kramer</a
+        >
+      </b>
     </div>
   </div>
 </template>
