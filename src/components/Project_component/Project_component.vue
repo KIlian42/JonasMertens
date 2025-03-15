@@ -27,7 +27,7 @@
     <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0" style="background-color: #ebeaea">
       <v-row class="ma-0 pa-0">
         <v-col
-          class="ma-0"
+          class="ma-0 pa-0"
           v-for="(_, index) in anzahl"
           :key="index"
           :cols="colSize"
@@ -35,10 +35,11 @@
             border-bottom: 1px solid black;
             height: auto;
             box-sizing: border-box;
-            padding: 20px important!;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
           "
           :style="{ 'border-right': index !== anzahl - 1 ? '1px solid black' : '' }"
         >
@@ -47,18 +48,21 @@
             @click="triggerFileInput(index)"
             @dragover.prevent
             @drop.prevent="onDropFile($event, index)"
-            :style="
-              imgurls[index]
+            :style="{
+              width: allWidth[index] + 'px',
+              height: allHeight[index] + 'px',
+              borderRadius: allBorderRadius[index] + 'px',
+              ...(imgurls[index]
                 ? {
                     backgroundImage: 'url(' + imgurls[index] + ')',
                     backgroundSize: '100% 100%',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                   }
-                : {}
-            "
+                : {}),
+            }"
           >
-            <span v-if="!imgurls[index]">Bild hinzufügen</span>
+            <span v-if="!imgurls[index]"><p>Bild hinzufügen</p></span>
           </div>
           <input
             type="file"
@@ -66,6 +70,10 @@
             style="display: none"
             @change="onDropBackgroundImage"
           />
+          <br v-if="allTitle[index]" />
+          {{ allTitle[index] }}
+          <br v-if="allDescription[index]" />
+          {{ allDescription[index] }}
         </v-col>
       </v-row>
     </v-container>
@@ -98,58 +106,69 @@
         </v-col>
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-text-field
-            v-model.number="width[selectedColumn]"
+            v-model.number="allWidth[selectedColumn - 1]"
             label="Breite"
             type="number"
             outlined
             dense
             step="1"
             min="0"
-            @input="width[selectedColumn] = Math.round(width[selectedColumn] || 0)"
+            @input="allWidth[selectedColumn - 1] = Math.round(allWidth[selectedColumn - 1] || 0)"
           ></v-text-field>
         </v-col>
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-text-field
-            v-model.number="height[selectedColumn]"
+            v-model.number="allHeight[selectedColumn - 1]"
             label="Höhe"
             type="number"
             outlined
             dense
             step="1"
             min="0"
-            @input="height[selectedColumn] = Math.round(height[selectedColumn] || 0)"
+            @input="allHeight[selectedColumn - 1] = Math.round(allHeight[selectedColumn - 1] || 0)"
           ></v-text-field>
         </v-col>
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-text-field
-            v-model.number="padding[selectedColumn]"
+            v-model.number="allPadding[selectedColumn - 1]"
             label="Abstand"
             type="number"
             outlined
             dense
             step="1"
             min="0"
-            @input="padding[selectedColumn] = Math.round(padding[selectedColumn] || 0)"
+            @input="
+              allPadding[selectedColumn - 1] = Math.round(allPadding[selectedColumn - 1] || 0)
+            "
           ></v-text-field>
         </v-col>
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-text-field
-            v-model.number="borderRadius[selectedColumn]"
+            v-model.number="allBorderRadius[selectedColumn - 1]"
             label="Gerundete Ecken"
             type="number"
             outlined
             dense
             step="1"
             min="0"
-            @input="borderRadius[selectedColumn] = Math.round(borderRadius[selectedColumn] || 0)"
+            @input="
+              allBorderRadius[selectedColumn - 1] = Math.round(
+                allBorderRadius[selectedColumn - 1] || 0,
+              )
+            "
           ></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" class="pa-1">
-          <v-text-field v-model="title[selectedColumn]" label="Titel" outlined dense></v-text-field>
+          <v-text-field
+            v-model="allTitle[selectedColumn - 1]"
+            label="Titel"
+            outlined
+            dense
+          ></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" class="pa-1">
           <v-text-field
-            v-model="description[selectedColumn]"
+            v-model="allDescription[selectedColumn - 1]"
             label="Bildbeschreibung"
             outlined
             dense
@@ -157,7 +176,7 @@
         </v-col>
         <v-col cols="12" sm="6" class="pa-1">
           <v-select
-            v-model="fitOption[selectedColumn]"
+            v-model="allFitOption[selectedColumn - 1]"
             :items="['fill', 'contain', 'cover']"
             label="Fit-Option"
             outlined
@@ -166,8 +185,8 @@
         </v-col>
         <v-col cols="12" sm="6" class="pa-1">
           <v-select
-            v-model="visible[selectedColumn]"
-            :items="['true', 'false']"
+            v-model="allVisible[selectedColumn - 1]"
+            :items="['Ja', 'Nein']"
             label="Sichtbar"
             outlined
             dense
@@ -183,14 +202,14 @@ import { ref, computed, onMounted } from 'vue'
 import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
 
-const width = ref([0, 0, 0, 0])
-const height = ref([0, 0, 0, 0])
-const padding = ref([0, 0, 0, 0])
-const borderRadius = ref([0, 0, 0, 0])
-const title = ref(['', '', '', ''])
-const description = ref(['', '', '', ''])
-const fitOption = ref(['fill', 'fill', 'fill', 'fill'])
-const visible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
+const allWidth = ref([600, 600, 600, 600])
+const allHeight = ref([600, 600, 600, 600])
+const allPadding = ref([0, 0, 0, 0])
+const allBorderRadius = ref([0, 0, 0, 0])
+const allTitle = ref(['', '', '', ''])
+const allDescription = ref(['', '', '', ''])
+const allFitOption = ref(['fill', 'fill', 'fill', 'fill'])
+const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
 const anzahl = ref(1)
 const colSize = computed(() => Math.floor(12 / anzahl.value))
 const selectedColumn = ref(1)
