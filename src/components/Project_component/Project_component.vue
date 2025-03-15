@@ -24,7 +24,7 @@
         </v-col>
       </v-row>
     </template>
-    <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0" style="background-color: #ebeaea">
+    <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0">
       <v-row class="ma-0 pa-0">
         <v-col
           class="ma-0 pa-0"
@@ -35,13 +35,7 @@
           :style="{ 'border-right': index !== anzahl - 1 ? '1px solid black' : '' }"
         >
           <div
-            style="
-              background-color: blue;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              overflow: scroll;
-            "
+            style="display: flex; align-items: center; justify-content: center; overflow: scroll"
             :style="{ padding: allPadding[index] + 'px' }"
           >
             <div
@@ -56,7 +50,7 @@
                 ...(imgurls[index]
                   ? {
                       backgroundImage: 'url(' + imgurls[index] + ')',
-                      backgroundSize: '100% 100%',
+                      backgroundSize: mapFitOption(allFitOption[index]),
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat',
                     }
@@ -72,10 +66,11 @@
             style="display: none"
             @change="onDropBackgroundImage"
           />
-          <br v-if="allTitle[index]" />
-          {{ allTitle[index] }}
-          <br v-if="allDescription[index]" />
-          {{ allDescription[index] }}
+          <!-- Textcontainer unter dem Bild -->
+          <div class="caption" style="margin-top: 10px; text-align: center">
+            <div v-if="allTitle[index]">{{ allTitle[index] }}</div>
+            <div v-if="allDescription[index]">{{ allDescription[index] }}</div>
+          </div>
         </v-col>
       </v-row>
     </v-container>
@@ -179,7 +174,7 @@
         <v-col cols="12" sm="6" class="pa-1">
           <v-select
             v-model="allFitOption[selectedColumn - 1]"
-            :items="['fill', 'contain', 'cover']"
+            :items="['Angepasst', 'Vollständig', 'Gefüllt']"
             label="Fit-Option"
             outlined
             dense
@@ -210,7 +205,7 @@ const allPadding = ref([10, 10, 10, 10])
 const allBorderRadius = ref([0, 0, 0, 0])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
-const allFitOption = ref(['fill', 'fill', 'fill', 'fill'])
+const allFitOption = ref(['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst'])
 const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
 const anzahl = ref(1)
 const colSize = computed(() => Math.floor(12 / anzahl.value))
@@ -282,6 +277,12 @@ const onDropFile = (event: DragEvent, index: number) => {
     imgurls.value[index] = URL.createObjectURL(files[0])
     console.log('Added image via drop:', imgurls.value[index])
   }
+}
+
+const mapFitOption = (fitOption: string): string => {
+  if (fitOption === 'Vollständig') return 'contain'
+  else if (fitOption === 'Gefüllt') return 'cover'
+  else if (fitOption === 'Angepasst') return '100% 100%' // fitOption === Angepasst
 }
 </script>
 
