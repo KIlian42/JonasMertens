@@ -31,38 +31,40 @@
           v-for="(_, index) in anzahl"
           :key="index"
           :cols="colSize"
-          style="
-            border-bottom: 1px solid black;
-            height: auto;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-          "
+          style="border-bottom: 1px solid black; height: auto; overflow: scroll"
           :style="{ 'border-right': index !== anzahl - 1 ? '1px solid black' : '' }"
         >
           <div
-            class="newimageelement"
-            @click="triggerFileInput(index)"
-            @dragover.prevent
-            @drop.prevent="onDropFile($event, index)"
-            :style="{
-              width: allWidth[index] + 'px',
-              height: allHeight[index] + 'px',
-              borderRadius: allBorderRadius[index] + 'px',
-              ...(imgurls[index]
-                ? {
-                    backgroundImage: 'url(' + imgurls[index] + ')',
-                    backgroundSize: '100% 100%',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }
-                : {}),
-            }"
+            style="
+              background-color: blue;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              overflow: scroll;
+            "
+            :style="{ padding: allPadding[index] + 'px' }"
           >
-            <span v-if="!imgurls[index]"><p>Bild hinzufügen</p></span>
+            <div
+              class="newimageelement"
+              @click="triggerFileInput(index)"
+              @dragover.prevent
+              @drop.prevent="onDropFile($event, index)"
+              :style="{
+                width: allWidth[index] + 'px',
+                height: allHeight[index] + 'px',
+                borderRadius: allBorderRadius[index] + 'px',
+                ...(imgurls[index]
+                  ? {
+                      backgroundImage: 'url(' + imgurls[index] + ')',
+                      backgroundSize: '100% 100%',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                    }
+                  : {}),
+              }"
+            >
+              <span v-if="!imgurls[index]"><p>Bild hinzufügen</p></span>
+            </div>
           </div>
           <input
             type="file"
@@ -204,7 +206,7 @@ import Loading_component from '../Loading_component/Loading_component.vue'
 
 const allWidth = ref([600, 600, 600, 600])
 const allHeight = ref([600, 600, 600, 600])
-const allPadding = ref([0, 0, 0, 0])
+const allPadding = ref([10, 10, 10, 10])
 const allBorderRadius = ref([0, 0, 0, 0])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
