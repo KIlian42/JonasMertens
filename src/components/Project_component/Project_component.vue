@@ -34,7 +34,6 @@
           class="ma-0 pa-0"
           v-for="(_, index) in anzahl"
           :key="index"
-          :cols="colSize"
           style="height: auto"
         >
           <div
