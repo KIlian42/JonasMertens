@@ -286,7 +286,7 @@ const onDropFile = (event: DragEvent, index: number) => {
 const mapFitOption = (fitOption: string): string => {
   if (fitOption === 'Vollständig') return 'contain'
   else if (fitOption === 'Gefüllt') return 'cover'
-  else if (fitOption === 'Angepasst') return '100% 100%' // fitOption === Angepasst
+  else return '100% 100%' // fitOption === Angepasst
 }
 </script>
 
