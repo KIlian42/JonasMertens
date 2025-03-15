@@ -27,6 +27,7 @@
     <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0">
       <v-row class="ma-0 pa-0">
         <v-col
+          xs="12"
           sm="12"
           md="6"
           :lg="12 / anzahl"
