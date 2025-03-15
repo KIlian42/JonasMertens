@@ -32,19 +32,46 @@
           :key="index"
           :cols="colSize"
           style="
-            border: 1px solid black;
+            border-bottom: 1px solid black;
             height: auto;
             box-sizing: border-box;
             padding: 20px important!;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           "
+          :style="{ 'border-right': index !== anzahl - 1 ? '1px solid black' : '' }"
         >
-          <div style="height: 300px; background-color: red; border-radius: 20px">Hallo</div>
+          <div
+            class="newimageelement"
+            @click="triggerFileInput(index)"
+            @dragover.prevent
+            @drop.prevent="onDropFile($event, index)"
+            :style="
+              imgurls[index]
+                ? {
+                    backgroundImage: 'url(' + imgurls[index] + ')',
+                    backgroundSize: '100% 100%',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  }
+                : {}
+            "
+          >
+            <span v-if="!imgurls[index]">Bild hinzufügen</span>
+          </div>
+          <input
+            type="file"
+            ref="fileInput"
+            style="display: none"
+            @change="onDropBackgroundImage"
+          />
         </v-col>
       </v-row>
     </v-container>
-    <div v-show="!editMenuOpen" class="addButton">
+    <div v-show="!editMenuOpen" class="addButton" @click="updateEditMenuOpen">
       <div class="addButtonInner">
-        <div class="addRowButton" @click="updateEditMenuOpen">
+        <div class="addRowButton">
           <v-icon size="61" class="add">mdi-plus-circle</v-icon>
         </div>
       </div>
@@ -163,7 +190,7 @@ const borderRadius = ref([0, 0, 0, 0])
 const title = ref(['', '', '', ''])
 const description = ref(['', '', '', ''])
 const fitOption = ref(['fill', 'fill', 'fill', 'fill'])
-const visible = ref([true, true, true, true])
+const visible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
 const anzahl = ref(1)
 const colSize = computed(() => Math.floor(12 / anzahl.value))
 const selectedColumn = ref(1)
@@ -175,6 +202,7 @@ const columnItems = computed(() => {
   }
   return items
 })
+const imgurls = ref(['', '', ''])
 
 const isLoading = ref(true)
 
@@ -201,6 +229,38 @@ const updateEditMenuOpen = () => {
       behavior: 'smooth', // Optional: sanfter Übergang
     })
   }, 250)
+}
+
+const fileInput = ref<HTMLInputElement | null>(null)
+// Optional: Speichere den aktuell ausgewählten Index, wenn du auch über den Klick-Input arbeitest
+const currentIndex = ref<number | null>(null)
+
+// Klick-Handler: Setzt den aktuellen Index und öffnet den versteckten File-Input
+const triggerFileInput = (index: number) => {
+  currentIndex.value = index
+  if (Array.isArray(fileInput.value)) {
+    fileInput.value[index].click()
+  } else {
+    fileInput.value?.click()
+  }
+}
+
+// Change-Handler für den File-Input (beim Klick)
+const onDropBackgroundImage = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0] && currentIndex.value !== null) {
+    imgurls.value[currentIndex.value] = URL.createObjectURL(target.files[0])
+    console.log('Added image via click:', imgurls.value[currentIndex.value])
+  }
+}
+
+// Drop-Handler für Drag-and-Drop
+const onDropFile = (event: DragEvent, index: number) => {
+  const files = event.dataTransfer?.files
+  if (files && files[0]) {
+    imgurls.value[index] = URL.createObjectURL(files[0])
+    console.log('Added image via drop:', imgurls.value[index])
+  }
 }
 </script>
 
