@@ -75,7 +75,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <div v-show="!editMenuOpen" class="addButton" @click="updateEditMenuOpen">
+    <div v-show="loggedIn && !editMenuOpen" class="addButton" @click="updateEditMenuOpen">
       <div class="addButtonInner">
         <div class="addRowButton">
           <v-icon size="61" class="add">mdi-plus-circle</v-icon>
@@ -204,9 +204,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { authStore } from '@/stores/authStore'
 import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
 
+const loggedIn = authStore.loggedIn
 const isLoading = ref(true)
 // Trigger loadImagesFromGitHub in projectStore
 const loadImages = async () => {
