@@ -6,18 +6,37 @@
         <v-col
           v-for="(img, colIndex) in rowImages"
           :key="`col-${rowIndex}-${colIndex}`"
-          cols="12"
-          md="6"
+          xs="12"
           sm="12"
+          md="6"
           :lg="12 / rowImages.length"
-          class="colelement"
+          class="ma-0 pa-0 colelement"
         >
           <v-container fluid class="element">
             <v-container fluid class="child">
-              <img :src="img.src" class="childimg" />
-              <div>
-                {{ img.title }} <br />
-                {{ img.description }}
+              <!-- Container mit Padding analog zum Edit-Bereich -->
+              <div
+                style="display: flex; align-items: center; justify-content: center"
+                :style="{ padding: img.padding + 'px' }"
+              >
+                <div
+                  class="newimageelement"
+                  :style="{
+                    width: img.width + 'px',
+                    height: img.height + 'px',
+                    borderRadius: img.border_radius + 'px',
+                    backgroundImage: 'url(' + img.src + ')',
+                    backgroundSize: mapFitOption(img.objectFit),
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  }"
+                >
+                  <span v-if="!img.src"><p>Bild hinzufügen</p></span>
+                </div>
+              </div>
+              <div class="caption" style="margin-top: 10px; text-align: center">
+                <div v-if="img.title">{{ img.title }}</div>
+                <div v-if="img.description">{{ img.description }}</div>
               </div>
             </v-container>
           </v-container>
@@ -59,7 +78,7 @@
                   : {}),
               }"
             >
-              <span v-if="!allNewImgUrls[index]"><p>Bild hinzufügen</p></span>
+              <span v-if="!allNewImgUrls[index]"><b>Bild hinzufügen</b></span>
             </div>
           </div>
           <div class="caption" style="margin-top: 10px; text-align: center">
