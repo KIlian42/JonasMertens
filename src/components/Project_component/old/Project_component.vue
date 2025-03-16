@@ -10,7 +10,7 @@
 import { ref } from 'vue'
 import { projectStore } from '@/stores/projectStore'
 
-const current_project = ref(projectStore.getCurrentProjectPage)
+const current_project = ref('') // ref(projectStore.getCurrentProjectPage)
 
 const addRow = () => {}
 </script>

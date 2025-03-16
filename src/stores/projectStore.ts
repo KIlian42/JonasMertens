@@ -6,6 +6,7 @@ const GITHUB_REPO = 'KIlian42/JonasMertensDatabase'
 const BRANCH = 'main'
 const SETTINGS_FILE_PATH = 'project_settings.json'
 const GITHUB_API_BASE_URL = 'https://api.github.com/repos'
+const IMAGES_FOLDER_PATH = 'images/' // Neuer Ordner-Pfad für Bilder
 
 // Hilfsfunktion für gemeinsame Request-Header
 function getHeaders(token: string) {
@@ -17,7 +18,7 @@ function getHeaders(token: string) {
 
 export const useProjectStore = defineStore('project', {
   state: () => ({
-    // images ist ein 2D-Array, das Zeilen (rows) von Bildobjekten enthält
+    // images ist ein 2D-Array: Zeilen (Rows) mit Bildobjekten als Spalten (Columns)
     images: [] as Array<
       Array<{
         id?: number
@@ -69,15 +70,19 @@ export const useProjectStore = defineStore('project', {
       const authStore = useAuthStore()
       const token = authStore.password
       try {
+        // Zuerst den aktuellen SHA abrufen:
+        const getUrl = `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}?ref=${BRANCH}&t=${Date.now()}`
+        const { data } = await axios.get(getUrl, { headers: getHeaders(token) })
+        const currentSha = data.sha
+
+        // Anschließend die Datei mit dem SHA aktualisieren:
         await axios.put(
           `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${SETTINGS_FILE_PATH}`,
           {
             message: 'Update project_settings.json.',
-            // Das gesamte Objekt wird aktualisiert,
-            // wobei images als Schlüssel in der JSON-Struktur gesetzt wird.
             content: btoa(JSON.stringify({ images: this.images }, null, 2)),
             branch: BRANCH,
-            // Falls erforderlich, sollte hier auch der "sha"-Wert des aktuellen Files übergeben werden.
+            sha: currentSha,
           },
           { headers: getHeaders(token) },
         )
@@ -110,6 +115,50 @@ export const useProjectStore = defineStore('project', {
         xhr.onerror = reject
         xhr.send()
       })
+    },
+
+    async updateProjectStoreonGithub() {
+      const authStore = useAuthStore()
+      const token = authStore.password
+
+      // Für jedes Bild in jeder Zeile:
+      for (const row of this.images) {
+        for (const image of row) {
+          // Falls die src noch nicht auf GitHub verweist
+          if (!image.src.startsWith('https://raw.githubusercontent.com/')) {
+            const imageName = image.name || `image_${Date.now()}.png`
+            let imageBase64 = ''
+
+            // Falls src bereits eine Data-URL ist, extrahiere den Base64-Teil,
+            // ansonsten konvertiere die externe URL.
+            if (image.src.startsWith('data:')) {
+              imageBase64 = image.src.split(',')[1]
+            } else {
+              imageBase64 = await this.convertImageToBase64(image.src)
+            }
+
+            try {
+              // Bilddatei hochladen
+              await axios.put(
+                `${GITHUB_API_BASE_URL}/${GITHUB_REPO}/contents/${IMAGES_FOLDER_PATH}${imageName}`,
+                { message: `Add image ${imageName}`, content: imageBase64, branch: BRANCH },
+                { headers: getHeaders(token) },
+              )
+              // Aktualisiere die Bild-URL im Store
+              image.src = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BRANCH}/${IMAGES_FOLDER_PATH}${imageName}`
+            } catch (error: any) {
+              console.error(
+                'Fehler beim Hochladen des Bildes:',
+                error.response?.data || error.message,
+              )
+              this.error = `Fehler beim Hochladen des Bildes: ${error.response?.data?.message || 'Unbekannter Fehler'}`
+            }
+          }
+        }
+      }
+
+      // Nachdem alle Bilder hochgeladen wurden, pushe die aktualisierte project_settings.json
+      await this.updateProjectSettingsOnGithub()
     },
   },
 })

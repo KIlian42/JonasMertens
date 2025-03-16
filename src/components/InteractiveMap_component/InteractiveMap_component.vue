@@ -498,7 +498,7 @@ const renderImages = () => {
         } else {
           if (img.project_page) {
             // Edit-Modus ist nicht aktiv, navigiere zu /project
-            projectStore.setCurrentProjectPage(img.id ? img.id : 0)
+            // projectStore.setCurrentProjectPage(img.id ? img.id : 0)
             router.push('/project')
           }
         }

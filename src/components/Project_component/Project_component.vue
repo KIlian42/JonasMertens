@@ -292,24 +292,35 @@ const closeEditMenu = () => {
   editMenuOpen.value = false
 }
 
-const updateImages = (): boolean => {
-  // const numberColumns = ref(1)
-  // const selectedColumn = ref(1)
-  // const allWidth = ref([600, 600, 600, 600])
-  // const allHeight = ref([600, 600, 600, 600])
-  // const allPadding = ref([10, 10, 10, 10])
-  // const allBorderRadius = ref([10, 10, 10, 10])
-  // const allTitle = ref(['', '', '', ''])
-  // const allDescription = ref(['', '', '', ''])
-  // const allFitOption = ref(['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst'])
-  // const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
-  // const allNewImgUrls = ref(['', '', '', ''])
+const updateImages = async (): Promise<boolean> => {
+  // Erstelle eine neue Zeile anhand der numberColumns und der Formulardaten
+  const newRow = []
+  for (let i = 0; i < numberColumns.value; i++) {
+    newRow.push({
+      // Hier kannst du den Namen ggf. noch dynamisch setzen
+      name: '',
+      // Enthält entweder eine Data-URL (z. B. von File-Input) oder einen externen Link
+      src: allNewImgUrls.value[i] || '',
+      width: allWidth.value[i],
+      height: allHeight.value[i],
+      padding: allPadding.value[i],
+      border_radius: allBorderRadius.value[i],
+      title: allTitle.value[i],
+      description: allDescription.value[i],
+      objectFit: allFitOption.value[i],
+      visible: allVisible.value[i],
+      subpage: '',
+    })
+  }
 
-  // TODO:
+  // Hänge die neue Zeile an das bestehende images-Array im Store an
+  projectStore.images.push(newRow)
 
-  // get maxRow -> +1
-  for (let i = 0; i < numberColumns.value; i++) {}
+  // Rufe nun die Store-Funktion auf, die erst alle Bilder in den /images-Ordner pusht
+  // und danach die project_settings.json aktualisiert.
+  await projectStore.updateProjectStoreonGithub()
 
+  closeEditMenu()
   return true
 }
 </script>
