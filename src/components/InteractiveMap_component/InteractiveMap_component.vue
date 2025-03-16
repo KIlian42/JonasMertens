@@ -628,5 +628,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-@import url('./Home_component.css');
+@import url('./InteractiveMap_component.css');
 </style>

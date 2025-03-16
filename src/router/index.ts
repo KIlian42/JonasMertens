@@ -5,8 +5,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('../components/Home_component/Home_component.vue'),
+      name: 'project',
+      component: () => import('../components/Project_component/Project_component.vue'),
     },
     {
       path: '/contact',
@@ -29,9 +29,10 @@ const router = createRouter({
       component: () => import('../components/Imprint_component/Imprint_component.vue'),
     },
     {
-      path: '/project',
-      name: 'project',
-      component: () => import('../components/Project_component/Project_component.vue'),
+      path: '/interactivemap',
+      name: 'interactivemap',
+      component: () =>
+        import('../components/InteractiveMap_component/InteractiveMap_component.vue'),
     },
   ],
 })

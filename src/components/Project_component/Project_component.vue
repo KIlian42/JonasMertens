@@ -30,9 +30,9 @@
           xs="12"
           sm="12"
           md="6"
-          :lg="12 / anzahl"
+          :lg="12 / numberColumns"
           class="ma-0 pa-0"
-          v-for="(_, index) in anzahl"
+          v-for="(_, index) in numberColumns"
           :key="index"
           style="height: auto"
         >
@@ -49,9 +49,9 @@
                 width: allWidth[index] + 'px',
                 height: allHeight[index] + 'px',
                 borderRadius: allBorderRadius[index] + 'px',
-                ...(imgurls[index]
+                ...(allNewImgUrls[index]
                   ? {
-                      backgroundImage: 'url(' + imgurls[index] + ')',
+                      backgroundImage: 'url(' + allNewImgUrls[index] + ')',
                       backgroundSize: mapFitOption(allFitOption[index]),
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat',
@@ -59,8 +59,12 @@
                   : {}),
               }"
             >
-              <span v-if="!imgurls[index]"><p>Bild hinzufügen</p></span>
+              <span v-if="!allNewImgUrls[index]"><p>Bild hinzufügen</p></span>
             </div>
+          </div>
+          <div class="caption" style="margin-top: 10px; text-align: center">
+            <div v-if="allTitle[index]">{{ allTitle[index] }}</div>
+            <div v-if="allDescription[index]">{{ allDescription[index] }}</div>
           </div>
           <input
             type="file"
@@ -68,11 +72,6 @@
             style="display: none"
             @change="onDropBackgroundImage"
           />
-          <!-- Textcontainer unter dem Bild -->
-          <div class="caption" style="margin-top: 10px; text-align: center">
-            <div v-if="allTitle[index]">{{ allTitle[index] }}</div>
-            <div v-if="allDescription[index]">{{ allDescription[index] }}</div>
-          </div>
         </v-col>
       </v-row>
     </v-container>
@@ -87,7 +86,7 @@
       <v-row class="ma-0 pa-0">
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-select
-            v-model="anzahl"
+            v-model="numberColumns"
             :items="[1, 2, 3, 4]"
             label="Anzahl Spalten"
             outlined
@@ -192,6 +191,12 @@
             disabled
           ></v-select>
         </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-btn color="#333333" @click="updateImages">Speichern</v-btn>
+        </v-col>
+        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-btn color="#333333" @click="closeEditMenu">Abbrechen</v-btn>
+        </v-col>
       </v-row>
     </div>
   </v-container>
@@ -202,6 +207,21 @@ import { ref, computed, onMounted } from 'vue'
 import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
 
+const isLoading = ref(true)
+// Trigger loadImagesFromGitHub in projectStore
+const loadImages = async () => {
+  isLoading.value = true
+  await projectStore.loadImagesFromGitHub()
+  isLoading.value = false
+}
+onMounted(() => {
+  loadImages()
+})
+// Load images into component and stay reactive on projectStore
+const images = computed(() => projectStore.getImages)
+
+const numberColumns = ref(1)
+const selectedColumn = ref(1)
 const allWidth = ref([600, 600, 600, 600])
 const allHeight = ref([600, 600, 600, 600])
 const allPadding = ref([10, 10, 10, 10])
@@ -210,39 +230,24 @@ const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
 const allFitOption = ref(['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst'])
 const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
-const anzahl = ref(1)
-const colSize = computed(() => Math.floor(12 / anzahl.value))
-const selectedColumn = ref(1)
+const allNewImgUrls = ref(['', '', '', ''])
+
+const editMenuOpen = ref<boolean>(false)
+const fileInput = ref<HTMLInputElement | null>(null)
+const currentIndex = ref<number | null>(null)
+
+// Reactive for numberColumns dropdown
 const columnItems = computed(() => {
   const items = []
-  // Erstelle ein Array mit Werten von 1 bis anzahl
-  for (let i = 1; i <= anzahl.value; i++) {
+  for (let i = 1; i <= numberColumns.value; i++) {
     items.push(i)
   }
   items.push('Alle')
   return items
 })
-const imgurls = ref(['', '', ''])
-
-const isLoading = ref(true)
-
-const images = computed(() => projectStore.getImages) // images ist ein Array von Arrays
-
-const loadImages = async () => {
-  isLoading.value = true
-  await projectStore.loadImagesFromGitHub()
-  isLoading.value = false
-}
-
-onMounted(() => {
-  loadImages()
-})
-
-const editMenuOpen = ref<boolean>(false)
 
 const updateEditMenuOpen = () => {
   editMenuOpen.value = !editMenuOpen.value
-  // Warte 300ms, bis das Menü animiert oder gerendert wurde
   setTimeout(() => {
     window.scrollTo({
       top: document.body.scrollHeight,
@@ -250,10 +255,6 @@ const updateEditMenuOpen = () => {
     })
   }, 250)
 }
-
-const fileInput = ref<HTMLInputElement | null>(null)
-// Optional: Speichere den aktuell ausgewählten Index, wenn du auch über den Klick-Input arbeitest
-const currentIndex = ref<number | null>(null)
 
 // Klick-Handler: Setzt den aktuellen Index und öffnet den versteckten File-Input
 const triggerFileInput = (index: number) => {
@@ -265,21 +266,19 @@ const triggerFileInput = (index: number) => {
   }
 }
 
-// Change-Handler für den File-Input (beim Klick)
 const onDropBackgroundImage = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0] && currentIndex.value !== null) {
-    imgurls.value[currentIndex.value] = URL.createObjectURL(target.files[0])
-    console.log('Added image via click:', imgurls.value[currentIndex.value])
+    allNewImgUrls.value[currentIndex.value] = URL.createObjectURL(target.files[0])
+    console.log('Added image via click:', allNewImgUrls.value[currentIndex.value])
   }
 }
 
-// Drop-Handler für Drag-and-Drop
 const onDropFile = (event: DragEvent, index: number) => {
   const files = event.dataTransfer?.files
   if (files && files[0]) {
-    imgurls.value[index] = URL.createObjectURL(files[0])
-    console.log('Added image via drop:', imgurls.value[index])
+    allNewImgUrls.value[index] = URL.createObjectURL(files[0])
+    console.log('Added image via drop:', allNewImgUrls.value[index])
   }
 }
 
@@ -287,6 +286,31 @@ const mapFitOption = (fitOption: string): string => {
   if (fitOption === 'Vollständig') return 'contain'
   else if (fitOption === 'Gefüllt') return 'cover'
   else return '100% 100%' // fitOption === Angepasst
+}
+
+const closeEditMenu = () => {
+  editMenuOpen.value = false
+}
+
+const updateImages = (): boolean => {
+  // const numberColumns = ref(1)
+  // const selectedColumn = ref(1)
+  // const allWidth = ref([600, 600, 600, 600])
+  // const allHeight = ref([600, 600, 600, 600])
+  // const allPadding = ref([10, 10, 10, 10])
+  // const allBorderRadius = ref([10, 10, 10, 10])
+  // const allTitle = ref(['', '', '', ''])
+  // const allDescription = ref(['', '', '', ''])
+  // const allFitOption = ref(['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst'])
+  // const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
+  // const allNewImgUrls = ref(['', '', '', ''])
+
+  // TODO:
+
+  // get maxRow -> +1
+  for (let i = 0; i < numberColumns.value; i++) {}
+
+  return true
 }
 </script>
 
