@@ -99,6 +99,16 @@
   transition: transform 0.3s ease;
 }
 
+/* Für kleine Bildschirme (z.B. XS, SM) */
+@media (max-width: 600px) {
+  .newimageelement {
+    width: 100% !important; /* Überschreibt die pixelweise Breite */
+    height: auto !important; /* Höhe passt sich automatisch an */
+    aspect-ratio: 16 / 9; /* Oder ein anderes gewünschtes Verhältnis */
+    background-size: cover !important; /* Sicherstellen, dass das Bild immer das Containerfeld füllt */
+  }
+}
+
 .newimageelement:hover {
   cursor: pointer;
   transform: scale(1.02);
