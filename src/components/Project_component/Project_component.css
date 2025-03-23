@@ -103,7 +103,7 @@
 /* Für kleine Bildschirme (z.B. XS, SM) */
 @media (max-width: 500px) {
   .newimageelement {
-    width: 100% !important; /* Überschreibt die pixelweise Breite */
+    width: 100%; /* Überschreibt die pixelweise Breite */
     height: auto !important; /* Höhe passt sich automatisch an */
     aspect-ratio: 8 / 12; /* Oder ein anderes gewünschtes Verhältnis */
     background-size: cover !important; /* Sicherstellen, dass das Bild immer das Containerfeld füllt */
@@ -117,6 +117,9 @@
   }
   .element {
     padding: 10px !important;
+  }
+  .rowelement {
+    flex-wrap: wrap;
   }
 }
 
