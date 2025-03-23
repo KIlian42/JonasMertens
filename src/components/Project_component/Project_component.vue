@@ -12,9 +12,10 @@
           :lg="12 / rowImages.length"
           class="ma-0 pa-0 colelement"
         >
-          <v-container fluid class="element">
-            <v-container fluid class="child">
+          <v-container fluid class="pa-1 ma-0 element">
+            <v-container fluid class="pa-0 ma-0 child">
               <div
+                class="newimageelementContainer"
                 style="display: flex; align-items: center; justify-content: center"
                 :style="{ padding: img.padding + 'px' }"
               >
@@ -47,7 +48,7 @@
                   </div>
                 </div>
               </div>
-              <div class="caption" style="margin-top: 10px; text-align: center">
+              <div class="caption" style="margin-top: 0px; text-align: center">
                 <div v-if="img.title">{{ img.title }}</div>
                 <div v-if="img.description">{{ img.description }}</div>
               </div>
@@ -69,6 +70,7 @@
           style="height: auto"
         >
           <div
+            class="newimageelementContainer"
             style="display: flex; align-items: center; justify-content: center"
             :style="{ padding: allPadding[index] + 'px' }"
           >
@@ -94,7 +96,7 @@
               <span v-if="!allNewImgUrls[index]"><b>Bild hinzufügen</b></span>
             </div>
           </div>
-          <div class="caption" style="margin-top: 10px; text-align: center">
+          <div class="caption" style="margin-top: 0px; text-align: center">
             <div v-if="allTitle[index]">{{ allTitle[index] }}</div>
             <div v-if="allDescription[index]">{{ allDescription[index] }}</div>
           </div>
