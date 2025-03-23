@@ -32,9 +32,16 @@
                   }"
                 >
                   <div
+                    class="edit-button"
+                    @click="editImage(rowIndex, colIndex)"
+                    style="position: absolute; right: 10px; bottom: 13px"
+                  >
+                    <v-icon size="40" color="white"> mdi-pencil </v-icon>
+                  </div>
+                  <div
                     class="delete-button"
                     @click="deleteImage(rowIndex, colIndex)"
-                    style="position: absolute; right: 10px; bottom: 13px"
+                    style="position: absolute; left: 10px; bottom: 13px"
                   >
                     <v-icon size="40" color="white"> mdi-delete </v-icon>
                   </div>
@@ -317,6 +324,8 @@ const closeEditMenu = () => {
 }
 
 const addImages = async (): Promise<boolean> => {
+  editMenuOpen.value = false
+  isLoading.value = true
   const addedImagesName = []
   const addedImagesSrc = []
   const newRow = []
@@ -339,16 +348,23 @@ const addImages = async (): Promise<boolean> => {
       subpage: '',
     })
   }
+  undoEdit()
   images.value.push(newRow)
   await projectStore.uploadImagesOnGithub(addedImagesName, addedImagesSrc)
   await updateProjectSettingsInStore()
   closeEditMenu()
+  window.scrollTo({
+    top: document.body.scrollHeight,
+  })
+  isLoading.value = false
   return true
 }
 
-const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
-  const deletedImagesName: string[] = []
+const editImage = async (rowIndex: number, colIndex: number = -1) => {}
 
+const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
+  isLoading.value = true
+  const deletedImagesName: string[] = []
   const newImages = images.value.map((row: any) => [...row])
   if (colIndex !== -1) {
     deletedImagesName.push(newImages[rowIndex][colIndex].id + '.png')
@@ -362,10 +378,13 @@ const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
     }
     newImages.splice(rowIndex, 1)
   }
-
   projectStore.setImages(newImages)
   await updateProjectSettingsInStore()
+  window.scrollTo({
+    top: document.body.scrollHeight,
+  })
   await projectStore.deleteImagesOnGithub(deletedImagesName)
+  isLoading.value = false
   return true
 }
 
@@ -374,6 +393,22 @@ const updateProjectSettingsInStore = async (): Promise<boolean> => {
   await projectStore.updateProjectSettingsOnGithub()
   await projectStore.loadImagesFromGitHub()
   return true
+}
+
+const undoEdit = () => {
+  numberColumns.value = 1
+  selectedColumn.value = 1
+  allWidth.value = [600, 600, 600, 600]
+  allHeight.value = [600, 600, 600, 600]
+  allPadding.value = [10, 10, 10, 10]
+  allBorderRadius.value = [10, 10, 10, 10]
+  allTitle.value = ['', '', '', '']
+  allDescription.value = ['', '', '', '']
+  allFitOption.value = ['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst']
+  allVisible.value = ['Ja', 'Ja', 'Ja', 'Ja']
+  allNewImgUrls.value = ['', '', '', '']
+  fileInput.value = null
+  currentIndex.value = null
 }
 </script>
 
