@@ -207,7 +207,7 @@
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-select
             v-model="allFitOption[selectedColumn - 1]"
-            :items="['Angepasst', 'Vollständig', 'Gefüllt']"
+            :items="['Gefüllt', 'Angepasst', 'Vollständig']"
             label="Fit-Option"
             outlined
             dense
@@ -262,7 +262,7 @@ const allPadding = ref([10, 10, 10, 10])
 const allBorderRadius = ref([10, 10, 10, 10])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
-const allFitOption = ref(['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst'])
+const allFitOption = ref(['Gefüllt', 'Gefüllt', 'Gefüllt', 'Gefüllt'])
 const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
 const allNewImgUrls = ref(['', '', '', ''])
 
@@ -404,7 +404,7 @@ const undoEdit = () => {
   allBorderRadius.value = [10, 10, 10, 10]
   allTitle.value = ['', '', '', '']
   allDescription.value = ['', '', '', '']
-  allFitOption.value = ['Angepasst', 'Angepasst', 'Angepasst', 'Angepasst']
+  allFitOption.value = ['Gefüllt', 'Gefüllt', 'Gefüllt', 'Gefüllt']
   allVisible.value = ['Ja', 'Ja', 'Ja', 'Ja']
   allNewImgUrls.value = ['', '', '', '']
   fileInput.value = null
