@@ -33,6 +33,7 @@
                   }"
                 >
                   <div
+                    v-show="loggedIn"
                     class="edit-button"
                     @click="editImage(rowIndex, colIndex)"
                     style="position: absolute; right: 10px; bottom: 13px"
@@ -40,6 +41,7 @@
                     <v-icon size="40" color="white"> mdi-pencil </v-icon>
                   </div>
                   <div
+                    v-show="loggedIn"
                     class="delete-button"
                     @click="deleteImage(rowIndex, colIndex)"
                     style="position: absolute; left: 10px; bottom: 13px"
