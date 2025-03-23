@@ -8,13 +8,12 @@
           :key="`col-${rowIndex}-${colIndex}`"
           xs="12"
           sm="12"
-          md="6"
+          md="12"
           :lg="12 / rowImages.length"
           class="ma-0 pa-0 colelement"
         >
           <v-container fluid class="element">
             <v-container fluid class="child">
-              <!-- Container mit Padding analog zum Edit-Bereich -->
               <div
                 style="display: flex; align-items: center; justify-content: center"
                 :style="{ padding: img.padding + 'px' }"
@@ -22,6 +21,7 @@
                 <div
                   class="newimageelement"
                   :style="{
+                    position: 'relative',
                     width: img.width + 'px',
                     height: img.height + 'px',
                     borderRadius: img.border_radius + 'px',
@@ -31,7 +31,13 @@
                     backgroundRepeat: 'no-repeat',
                   }"
                 >
-                  <span v-if="!img.src"><p>Bild hinzufügen</p></span>
+                  <div
+                    class="delete-button"
+                    @click="deleteImage(rowIndex, colIndex)"
+                    style="position: absolute; right: 10px; bottom: 13px"
+                  >
+                    <v-icon size="40" color="white"> mdi-delete </v-icon>
+                  </div>
                 </div>
               </div>
               <div class="caption" style="margin-top: 10px; text-align: center">
@@ -211,7 +217,7 @@
           ></v-select>
         </v-col>
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-btn color="#333333" @click="updateImages">Speichern</v-btn>
+          <v-btn color="#333333" @click="addImages">Speichern</v-btn>
         </v-col>
         <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
           <v-btn color="#333333" @click="closeEditMenu">Abbrechen</v-btn>
@@ -226,19 +232,19 @@ import { ref, computed, onMounted } from 'vue'
 import { authStore } from '@/stores/authStore'
 import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
+import { v4 as uuidv4 } from 'uuid'
 
 const loggedIn = authStore.loggedIn
 const isLoading = ref(true)
-// Trigger loadImagesFromGitHub in projectStore
 const loadImages = async () => {
   isLoading.value = true
   await projectStore.loadImagesFromGitHub()
   isLoading.value = false
 }
-onMounted(() => {
-  loadImages()
+
+onMounted(async () => {
+  await loadImages()
 })
-// Load images into component and stay reactive on projectStore
 const images = computed(() => projectStore.getImages)
 
 const numberColumns = ref(1)
@@ -277,7 +283,6 @@ const updateEditMenuOpen = () => {
   }, 250)
 }
 
-// Klick-Handler: Setzt den aktuellen Index und öffnet den versteckten File-Input
 const triggerFileInput = (index: number) => {
   currentIndex.value = index
   if (Array.isArray(fileInput.value)) {
@@ -291,7 +296,6 @@ const onDropBackgroundImage = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0] && currentIndex.value !== null) {
     allNewImgUrls.value[currentIndex.value] = URL.createObjectURL(target.files[0])
-    console.log('Added image via click:', allNewImgUrls.value[currentIndex.value])
   }
 }
 
@@ -299,7 +303,6 @@ const onDropFile = (event: DragEvent, index: number) => {
   const files = event.dataTransfer?.files
   if (files && files[0]) {
     allNewImgUrls.value[index] = URL.createObjectURL(files[0])
-    console.log('Added image via drop:', allNewImgUrls.value[index])
   }
 }
 
@@ -313,15 +316,18 @@ const closeEditMenu = () => {
   editMenuOpen.value = false
 }
 
-const updateImages = async (): Promise<boolean> => {
-  // Erstelle eine neue Zeile anhand der numberColumns und der Formulardaten
+const addImages = async (): Promise<boolean> => {
+  const addedImagesName = []
+  const addedImagesSrc = []
   const newRow = []
   for (let i = 0; i < numberColumns.value; i++) {
+    const uuid = uuidv4()
+    const fileName = uuid + '.png'
+    addedImagesName.push(fileName)
+    addedImagesSrc.push(allNewImgUrls.value[i])
     newRow.push({
-      // Hier kannst du den Namen ggf. noch dynamisch setzen
-      name: '',
-      // Enthält entweder eine Data-URL (z. B. von File-Input) oder einen externen Link
-      src: allNewImgUrls.value[i] || '',
+      id: uuid,
+      src: allNewImgUrls.value[i],
       width: allWidth.value[i],
       height: allHeight.value[i],
       padding: allPadding.value[i],
@@ -333,15 +339,40 @@ const updateImages = async (): Promise<boolean> => {
       subpage: '',
     })
   }
-
-  // Hänge die neue Zeile an das bestehende images-Array im Store an
-  projectStore.images.push(newRow)
-
-  // Rufe nun die Store-Funktion auf, die erst alle Bilder in den /images-Ordner pusht
-  // und danach die project_settings.json aktualisiert.
-  await projectStore.updateProjectStoreonGithub()
-
+  images.value.push(newRow)
+  await projectStore.uploadImagesOnGithub(addedImagesName, addedImagesSrc)
+  await updateProjectSettingsInStore()
   closeEditMenu()
+  return true
+}
+
+const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
+  const deletedImagesName: string[] = []
+
+  const newImages = images.value.map((row: any) => [...row])
+  if (colIndex !== -1) {
+    deletedImagesName.push(newImages[rowIndex][colIndex].id + '.png')
+    newImages[rowIndex].splice(colIndex, 1)
+    if (newImages[rowIndex].length === 0) {
+      newImages.splice(rowIndex, 1)
+    }
+  } else {
+    for (const image of newImages[rowIndex]) {
+      deletedImagesName.push(image.id + '.png')
+    }
+    newImages.splice(rowIndex, 1)
+  }
+
+  projectStore.setImages(newImages)
+  await updateProjectSettingsInStore()
+  await projectStore.deleteImagesOnGithub(deletedImagesName)
+  return true
+}
+
+const updateProjectSettingsInStore = async (): Promise<boolean> => {
+  projectStore.setImages(images.value)
+  await projectStore.updateProjectSettingsOnGithub()
+  await projectStore.loadImagesFromGitHub()
   return true
 }
 </script>

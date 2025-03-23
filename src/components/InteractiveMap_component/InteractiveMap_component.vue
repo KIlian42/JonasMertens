@@ -323,7 +323,6 @@ const openPopup = () => {
 }
 
 const closePopup = () => {
-  console.log('close Popup')
   showPopup.value = false
   addImageMode.value = false
   selectedFile.value = null

@@ -86,7 +86,7 @@
       Analyse-Funktionen) erfolgt, werden diese in dieser Datenschutzerklärung separat behandelt.
       <br /><br />
       <b>
-        Bei weiteren Fragen, wenden Sie sich bitte an den Entwickler dieser Webseite:
+        Bei weiteren Fragen, wenden Sie sich bitte an den Betreiber dieser Webseite:
         <a class="highlight-text" target="”_blank”" href="https://www.kiliankramer.com"
           >Kilian Kramer</a
         >

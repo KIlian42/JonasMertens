@@ -1,5 +1,12 @@
 import { defineStore } from 'pinia'
-import { useImageStore } from '@/stores/imageStore'
+import axios from 'axios'
+
+function getHeaders(token: string) {
+  return {
+    Authorization: `token ${token}`,
+    Accept: 'application/vnd.github.v3+json',
+  }
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -13,16 +20,24 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    loadPasswordFromCookie() {
+      const cookieMatch = document.cookie.match(/jonashomepagelogincookie=([^;]*)/)
+      if (cookieMatch) {
+        this.password = cookieMatch[1]
+        this.loggedIn = true
+      }
+    },
+
     async login(password: string): Promise<boolean> {
       this.password = password
-      const imageStore = useImageStore()
-      const success = await imageStore.loadImagesFromGitHubWithAuth(this.password)
+      const success = await this.test_authentification()
       if (success) {
         this.loggedIn = true
         document.cookie = `jonashomepagelogincookie=${password}; path=/; max-age=1800` // 30 Minuten speichern
-        return true // Erfolgreich eingeloggt ✅
+        return true
       } else {
-        return false // Fehler beim Data fetching ❌
+        this.password = ''
+        return false
       }
     },
 
@@ -32,11 +47,15 @@ export const useAuthStore = defineStore('auth', {
       document.cookie = 'jonashomepagelogincookie=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC' // Cookie löschen
     },
 
-    loadPasswordFromCookie() {
-      const cookieMatch = document.cookie.match(/jonashomepagelogincookie=([^;]*)/)
-      if (cookieMatch) {
-        this.password = cookieMatch[1]
-        this.loggedIn = true
+    async test_authentification(): Promise<boolean> {
+      try {
+        const response = await axios.get(
+          'https://api.github.com/repos/KIlian42/JonasMertensDatabase/contents/project_settings.json',
+          { headers: getHeaders(this.password) },
+        )
+        return response.status === 200
+      } catch (error) {
+        return false
       }
     },
   },
