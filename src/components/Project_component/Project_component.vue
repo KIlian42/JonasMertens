@@ -12,7 +12,7 @@
           :lg="12 / rowImages.length"
           class="ma-0 pa-0 colelement"
         >
-          <v-container fluid class="pa-1 ma-0 element">
+          <v-container fluid class="pa-0 ma-0 element">
             <v-container fluid class="pa-0 ma-0 child">
               <div
                 class="newimageelementContainer"

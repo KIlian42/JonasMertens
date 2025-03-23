@@ -19,6 +19,7 @@
 .element {
   height: auto;
   margin: 0;
+  padding: 20px !important;
 }
 
 .child {
@@ -113,6 +114,9 @@
   }
   .caption {
     text-align: left !important;
+  }
+  .element {
+    padding: 10px !important;
   }
 }
 
