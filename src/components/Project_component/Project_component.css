@@ -19,7 +19,7 @@
 .element {
   height: auto;
   margin: 0;
-  padding: 20px !important;
+  padding: 0px !important;
 }
 
 .child {
@@ -125,7 +125,7 @@
 
 .newimageelement:hover {
   cursor: pointer;
-  transform: scale(1.02);
+  transform: scale(1.01);
 }
 
 .delete-button,

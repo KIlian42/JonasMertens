@@ -60,54 +60,58 @@
       </v-row>
     </template>
     <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0">
-      <v-row class="ma-0 pa-0">
+      <v-row class="ma-0 pa-0 rowelement">
         <v-col
-          xs="12"
-          sm="12"
-          md="6"
-          :lg="12 / numberColumns"
-          class="ma-0 pa-0"
           v-for="(_, index) in numberColumns"
           :key="index"
-          style="height: auto"
+          xs="12"
+          sm="12"
+          md="12"
+          :lg="12 / numberColumns"
+          class="ma-0 pa-0 colelement"
         >
-          <div
-            class="newimageelementContainer"
-            style="display: flex; align-items: center; justify-content: center"
-            :style="{ padding: allPadding[index] + 'px' }"
-          >
-            <div
-              class="newimageelement"
-              @click="triggerFileInput(index)"
-              @dragover.prevent
-              @drop.prevent="onDropFile($event, index)"
-              :style="{
-                width: allWidth[index] + 'px',
-                height: allHeight[index] + 'px',
-                borderRadius: allBorderRadius[index] + 'px',
-                ...(allNewImgUrls[index]
-                  ? {
-                      backgroundImage: 'url(' + allNewImgUrls[index] + ')',
-                      backgroundSize: mapFitOption(allFitOption[index]),
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
-                    }
-                  : {}),
-              }"
-            >
-              <span v-if="!allNewImgUrls[index]"><b>Bild hinzufügen</b></span>
-            </div>
-          </div>
-          <div class="caption" style="margin-top: 0px; text-align: center">
-            <div v-if="allTitle[index]">{{ allTitle[index] }}</div>
-            <div v-if="allDescription[index]">{{ allDescription[index] }}</div>
-          </div>
-          <input
-            type="file"
-            ref="fileInput"
-            style="display: none"
-            @change="onDropBackgroundImage"
-          />
+          <v-container fluid class="pa-0 ma-0 element">
+            <v-container fluid class="pa-0 ma-0 child">
+              <div
+                class="newimageelementContainer"
+                style="display: flex; align-items: center; justify-content: center"
+                :style="{ padding: allPadding[index] + 'px' }"
+              >
+                <div
+                  class="newimageelement"
+                  @click="triggerFileInput(index)"
+                  @dragover.prevent
+                  @drop.prevent="onDropFile($event, index)"
+                  :style="{
+                    position: 'relative',
+                    width: allWidth[index] + 'px',
+                    height: allHeight[index] + 'px',
+                    borderRadius: allBorderRadius[index] + 'px',
+                    ...(allNewImgUrls[index]
+                      ? {
+                          backgroundImage: 'url(' + allNewImgUrls[index] + ')',
+                          backgroundSize: mapFitOption(allFitOption[index]),
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                        }
+                      : {}),
+                  }"
+                >
+                  <span v-if="!allNewImgUrls[index]"><b>Bild hinzufügen</b></span>
+                </div>
+              </div>
+              <div class="caption" style="margin-top: 0px; text-align: center">
+                <div v-if="allTitle[index]">{{ allTitle[index] }}</div>
+                <div v-if="allDescription[index]">{{ allDescription[index] }}</div>
+              </div>
+              <input
+                type="file"
+                ref="fileInput"
+                style="display: none"
+                @change="onDropBackgroundImage"
+              />
+            </v-container>
+          </v-container>
         </v-col>
       </v-row>
     </v-container>
@@ -260,7 +264,7 @@ const images = computed(() => projectStore.getImages)
 
 const numberColumns = ref(1)
 const selectedColumn = ref(1)
-const allWidth = ref([600, 600, 600, 600])
+const allWidth = ref([700, 700, 700, 700])
 const allHeight = ref([600, 600, 600, 600])
 const allPadding = ref([10, 10, 10, 10])
 const allBorderRadius = ref([10, 10, 10, 10])
