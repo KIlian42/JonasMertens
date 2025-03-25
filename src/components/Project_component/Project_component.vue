@@ -368,7 +368,24 @@ const addImages = async (): Promise<boolean> => {
   return true
 }
 
-const editImage = async (rowIndex: number, colIndex: number = -1) => {}
+const editImage = async (rowIndex: number, colIndex: number = -1) => {
+  editMenuOpen.value = true
+  if (colIndex !== -1) {
+    numberColumns.value = 1
+    selectedColumn.value = 1
+    allWidth.value = [600, 600, 600, 600]
+    allHeight.value = [600, 600, 600, 600]
+    allPadding.value = [10, 10, 10, 10]
+    allBorderRadius.value = [10, 10, 10, 10]
+    allTitle.value = ['', '', '', '']
+    allDescription.value = ['', '', '', '']
+    allFitOption.value = ['Gefüllt', 'Gefüllt', 'Gefüllt', 'Gefüllt']
+    allVisible.value = ['Ja', 'Ja', 'Ja', 'Ja']
+    allNewImgUrls.value = ['', '', '', '']
+    fileInput.value = null
+    currentIndex.value = null
+  }
+}
 
 const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
   isLoading.value = true
