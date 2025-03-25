@@ -1,5 +1,24 @@
 <template>
   <v-container fluid class="pa-0 ma-0 container">
+    <div :class="['newnav', { open: isOpen }]">
+      <v-container no-gutters class="ma-0 pa-0 newnavContainer">
+        <div class="closeIcon">
+          <v-icon size="60" color="black"> mdi-close-circle </v-icon>
+        </div>
+        <v-row class="ma-0 pa-0" style="height: 100px"></v-row>
+        <v-row class="ma-0 pa-0">
+          <v-col cols="12" class="ma-0 pa-0">
+            <v-select
+              v-model="allFitOption[selectedColumn - 1]"
+              :items="['Gefüllt', 'Angepasst', 'Vollständig']"
+              label="Fit-Option"
+              outlined
+              dense
+            ></v-select>
+          </v-col>
+        </v-row>
+      </v-container>
+    </div>
     <Loading_component v-show="isLoading"></Loading_component>
     <template v-for="(rowImages, rowIndex) in images" :key="`row-${rowIndex}`">
       <v-row no-gutters class="pa-0 ma-0 rowelement">
@@ -249,6 +268,8 @@ import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
 import { v4 as uuidv4 } from 'uuid'
 
+const isOpen = ref<boolean>(false)
+
 const loggedIn = authStore.loggedIn
 const isLoading = ref(true)
 const loadImages = async () => {
@@ -369,6 +390,7 @@ const addImages = async (): Promise<boolean> => {
 }
 
 const editImage = async (rowIndex: number, colIndex: number = -1) => {
+  isOpen.value = !isOpen.value
   editMenuOpen.value = true
   if (colIndex !== -1) {
     numberColumns.value = 1
