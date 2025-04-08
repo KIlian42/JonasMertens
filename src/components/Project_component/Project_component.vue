@@ -1,13 +1,103 @@
 <template>
   <v-container fluid class="pa-0 ma-0 container">
-    <div :class="['newnav', { open: isOpen }]">
+    <div :class="['newnav', { open: _isOpen }]" :style="{ opacity: isOpen ? 1 : 0 }">
       <v-container no-gutters class="ma-0 pa-0 newnavContainer">
-        <div class="closeIcon">
+        <div class="closeIcon" @click="updateEditMenuOpen">
           <v-icon size="60" color="black"> mdi-close-circle </v-icon>
         </div>
         <v-row class="ma-0 pa-0" style="height: 100px"></v-row>
         <v-row class="ma-0 pa-0">
-          <v-col cols="12" class="ma-0 pa-0">
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-select
+              v-model="numberColumns"
+              :items="[1, 2, 3, 4]"
+              label="Anzahl Spalten"
+              outlined
+              dense
+            ></v-select>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-select
+              v-model="selectedColumn"
+              :items="columnItems"
+              label="Ausgewählte Spalte"
+              outlined
+              dense
+            ></v-select>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allWidth[selectedColumn - 1]"
+              label="Breite"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="allWidth[selectedColumn - 1] = Math.round(allWidth[selectedColumn - 1] || 0)"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allHeight[selectedColumn - 1]"
+              label="Höhe"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allHeight[selectedColumn - 1] = Math.round(allHeight[selectedColumn - 1] || 0)
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allPadding[selectedColumn - 1]"
+              label="Abstand"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allPadding[selectedColumn - 1] = Math.round(allPadding[selectedColumn - 1] || 0)
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allBorderRadius[selectedColumn - 1]"
+              label="Gerundete Ecken"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allBorderRadius[selectedColumn - 1] = Math.round(
+                  allBorderRadius[selectedColumn - 1] || 0,
+                )
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model="allTitle[selectedColumn - 1]"
+              label="Titel"
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model="allDescription[selectedColumn - 1]"
+              label="Bildbeschreibung"
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
             <v-select
               v-model="allFitOption[selectedColumn - 1]"
               :items="['Gefüllt', 'Angepasst', 'Vollständig']"
@@ -15,6 +105,22 @@
               outlined
               dense
             ></v-select>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-select
+              v-model="allVisible[selectedColumn - 1]"
+              :items="['Ja', 'Nein']"
+              label="Sichtbar"
+              outlined
+              dense
+              disabled
+            ></v-select>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-btn color="#333333" @click="addImages">Speichern</v-btn>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-btn color="#333333" @click="closeEditMenu">Abbrechen</v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -141,123 +247,6 @@
         </div>
       </div>
     </div>
-    <div class="editMenu" :class="{ open: editMenuOpen }">
-      <v-row class="ma-0 pa-0">
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-select
-            v-model="numberColumns"
-            :items="[1, 2, 3, 4]"
-            label="Anzahl Spalten"
-            outlined
-            dense
-          ></v-select>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-select
-            v-model="selectedColumn"
-            :items="columnItems"
-            label="Ausgewählte Spalte"
-            outlined
-            dense
-          ></v-select>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-text-field
-            v-model.number="allWidth[selectedColumn - 1]"
-            label="Breite"
-            type="number"
-            outlined
-            dense
-            step="1"
-            min="0"
-            @input="allWidth[selectedColumn - 1] = Math.round(allWidth[selectedColumn - 1] || 0)"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-text-field
-            v-model.number="allHeight[selectedColumn - 1]"
-            label="Höhe"
-            type="number"
-            outlined
-            dense
-            step="1"
-            min="0"
-            @input="allHeight[selectedColumn - 1] = Math.round(allHeight[selectedColumn - 1] || 0)"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-text-field
-            v-model.number="allPadding[selectedColumn - 1]"
-            label="Abstand"
-            type="number"
-            outlined
-            dense
-            step="1"
-            min="0"
-            @input="
-              allPadding[selectedColumn - 1] = Math.round(allPadding[selectedColumn - 1] || 0)
-            "
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-text-field
-            v-model.number="allBorderRadius[selectedColumn - 1]"
-            label="Gerundete Ecken"
-            type="number"
-            outlined
-            dense
-            step="1"
-            min="0"
-            @input="
-              allBorderRadius[selectedColumn - 1] = Math.round(
-                allBorderRadius[selectedColumn - 1] || 0,
-              )
-            "
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-text-field
-            v-model="allTitle[selectedColumn - 1]"
-            label="Titel"
-            outlined
-            dense
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-text-field
-            v-model="allDescription[selectedColumn - 1]"
-            label="Bildbeschreibung"
-            outlined
-            dense
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-select
-            v-model="allFitOption[selectedColumn - 1]"
-            :items="['Gefüllt', 'Angepasst', 'Vollständig']"
-            label="Fit-Option"
-            outlined
-            dense
-          ></v-select>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-select
-            v-model="allVisible[selectedColumn - 1]"
-            :items="['Ja', 'Nein']"
-            label="Sichtbar"
-            outlined
-            dense
-            disabled
-          ></v-select>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-btn color="#333333" @click="addImages">Speichern</v-btn>
-        </v-col>
-        <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-          <v-btn color="#333333" @click="closeEditMenu">Abbrechen</v-btn>
-        </v-col>
-      </v-row>
-    </div>
   </v-container>
 </template>
 
@@ -268,7 +257,7 @@ import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
 import { v4 as uuidv4 } from 'uuid'
 
-const isOpen = ref<boolean>(false)
+const _isOpen = ref<boolean>(false)
 
 const loggedIn = authStore.loggedIn
 const isLoading = ref(true)
@@ -309,8 +298,18 @@ const columnItems = computed(() => {
   return items
 })
 
+const isOpen = computed({
+  get() {
+    return _isOpen.value
+  },
+  set(newValue: boolean) {
+    _isOpen.value = newValue
+  },
+})
+
 const updateEditMenuOpen = () => {
   editMenuOpen.value = !editMenuOpen.value
+  isOpen.value = !isOpen.value
   setTimeout(() => {
     window.scrollTo({
       top: document.body.scrollHeight,
@@ -390,7 +389,7 @@ const addImages = async (): Promise<boolean> => {
 }
 
 const editImage = async (rowIndex: number, colIndex: number = -1) => {
-  isOpen.value = !isOpen.value
+  _isOpen.value = !_isOpen.value
   editMenuOpen.value = true
   if (colIndex !== -1) {
     numberColumns.value = 1
