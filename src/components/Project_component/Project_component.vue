@@ -142,17 +142,34 @@
               <div
                 class="newimageelementContainer"
                 style="display: flex; align-items: center; justify-content: center"
-                :style="{ padding: img.padding + 'px' }"
+                :style="{
+                  padding:
+                    isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                      ? allPadding[0] + 'px'
+                      : img.padding + 'px',
+                }"
               >
                 <div
                   class="newimageelement"
                   :style="{
                     position: 'relative',
-                    width: img.width + 'px',
-                    height: img.height + 'px',
-                    borderRadius: img.border_radius + 'px',
+                    width:
+                      isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                        ? allWidth[0] + 'px'
+                        : img.width + 'px',
+                    height:
+                      isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                        ? allHeight[0] + 'px'
+                        : img.height + 'px',
+                    borderRadius:
+                      isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                        ? allBorderRadius[0] + 'px'
+                        : img.border_radius + 'px',
                     backgroundImage: 'url(' + img.src + ')',
-                    backgroundSize: mapFitOption(img.objectFit),
+                    backgroundSize:
+                      isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                        ? allFitOption[0]
+                        : mapFitOption(img.objectFit),
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                   }"
@@ -176,7 +193,22 @@
                 </div>
               </div>
               <div class="caption" style="margin-top: 0px; text-align: center">
-                <div v-if="img.title">{{ img.title }}</div>
+                <!-- isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex? -->
+                <div
+                  v-if="
+                    isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                  "
+                >
+                  {{ allTitle[0] }}
+                </div>
+                <div v-else-if="img.title">{{ img.title }}</div>
+                <div
+                  v-if="
+                    isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                  "
+                >
+                  {{ allDescription[0] }}
+                </div>
                 <div v-if="img.description">{{ img.description }}</div>
               </div>
             </v-container>
@@ -340,7 +372,7 @@ const updateEditMenuAndScrollToBottom = () => {
   setTimeout(() => {
     window.scrollTo({
       top: document.body.scrollHeight,
-      behavior: 'smooth', // Optional: sanfter Übergang
+      behavior: 'smooth',
     })
   }, 250)
 }
@@ -376,36 +408,51 @@ const mapFitOption = (fitOption: string): string => {
 
 const addImages = async (): Promise<boolean> => {
   isLoading.value = true
-  const addedImagesName = []
-  const addedImagesSrc = []
-  const newRow = []
-  for (let i = 0; i < numberColumns.value; i++) {
-    const uuid = uuidv4()
-    const fileName = uuid + '.png'
-    addedImagesName.push(fileName)
-    addedImagesSrc.push(allNewImgUrls.value[i])
-    newRow.push({
-      id: uuid,
-      src: allNewImgUrls.value[i],
-      width: allWidth.value[i],
-      height: allHeight.value[i],
-      padding: allPadding.value[i],
-      border_radius: allBorderRadius.value[i],
-      title: allTitle.value[i],
-      description: allDescription.value[i],
-      objectFit: allFitOption.value[i],
-      visible: allVisible.value[i],
-      subpage: '',
-    })
+  if (!isEditImageMode.value) {
+    const addedImagesName = []
+    const addedImagesSrc = []
+    const newRow = []
+    for (let i = 0; i < numberColumns.value; i++) {
+      const uuid = uuidv4()
+      const fileName = uuid + '.png'
+      addedImagesName.push(fileName)
+      addedImagesSrc.push(allNewImgUrls.value[i])
+      newRow.push({
+        id: uuid,
+        src: allNewImgUrls.value[i],
+        width: allWidth.value[i],
+        height: allHeight.value[i],
+        padding: allPadding.value[i],
+        border_radius: allBorderRadius.value[i],
+        title: allTitle.value[i],
+        description: allDescription.value[i],
+        objectFit: allFitOption.value[i],
+        visible: allVisible.value[i],
+        subpage: '',
+      })
+    }
+    images.value.push(newRow)
+    await projectStore.uploadImagesOnGithub(addedImagesName, addedImagesSrc)
+  } else {
+    images.value[selectedEditRow.value][selectedEditCol.value]['width'] = allWidth.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['height'] = allHeight.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['padding'] = allPadding.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['border_radius'] =
+      allBorderRadius.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['title'] = allTitle.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['description'] =
+      allDescription.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['objectFit'] = allFitOption.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['visible'] = allVisible.value[0]
   }
-  undoEdit()
-  images.value.push(newRow)
-  await projectStore.uploadImagesOnGithub(addedImagesName, addedImagesSrc)
   await updateProjectSettingsInStore()
   closeMenu()
-  window.scrollTo({
-    top: document.body.scrollHeight,
-  })
+  setTimeout(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, 250)
   isLoading.value = false
   return true
 }
@@ -444,9 +491,12 @@ const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
   }
   projectStore.setImages(newImages)
   await updateProjectSettingsInStore()
-  window.scrollTo({
-    top: document.body.scrollHeight,
-  })
+  setTimeout(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, 250)
   await projectStore.deleteImagesOnGithub(deletedImagesName)
   isLoading.value = false
   return true
@@ -460,6 +510,8 @@ const updateProjectSettingsInStore = async (): Promise<boolean> => {
 }
 
 const undoEdit = () => {
+  selectedEditRow.value = -1
+  selectedEditCol.value = -1
   numberColumns.value = 1
   selectedColumn.value = 1
   allWidth.value = [600, 600, 600, 600]
