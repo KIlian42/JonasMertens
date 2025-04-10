@@ -154,11 +154,6 @@
   }
 }
 
-.newimageelement:hover {
-  cursor: pointer;
-  transform: scale(1.01);
-}
-
 .delete-button,
 .edit-button {
   transition: transform 0.1s ease;
@@ -168,4 +163,9 @@
 .edit-button:hover {
   cursor: pointer;
   transform: scale(1.2);
+}
+
+.newImage:hover {
+  cursor: pointer;
+  transform: scale(1.01);
 }

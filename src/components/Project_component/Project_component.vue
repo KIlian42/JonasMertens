@@ -1,13 +1,13 @@
 <template>
   <v-container fluid class="pa-0 ma-0 container">
-    <div :class="['newnav', { open: _isOpen }]" :style="{ opacity: isOpen ? 1 : 0 }">
+    <div :class="['newnav', { open: isEditMenuOpen }]" :style="{ opacity: isEditMenuOpen ? 1 : 0 }">
       <v-container no-gutters class="ma-0 pa-0 newnavContainer">
-        <div class="closeIcon" @click="updateEditMenuOpen">
+        <div class="closeIcon" @click="closeMenu">
           <v-icon size="60" color="black"> mdi-close-circle </v-icon>
         </div>
         <v-row class="ma-0 pa-0" style="height: 100px"></v-row>
         <v-row class="ma-0 pa-0">
-          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-col v-if="!isEditImageMode" cols="12" sm="12" md="6" class="ma-0 pa-2">
             <v-select
               v-model="numberColumns"
               :items="[1, 2, 3, 4]"
@@ -16,7 +16,7 @@
               dense
             ></v-select>
           </v-col>
-          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+          <v-col v-if="!isEditImageMode" cols="12" sm="12" md="6" class="ma-0 pa-2">
             <v-select
               v-model="selectedColumn"
               :items="columnItems"
@@ -100,7 +100,7 @@
           <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
             <v-select
               v-model="allFitOption[selectedColumn - 1]"
-              :items="['Gefüllt', 'Angepasst', 'Vollständig']"
+              :items="['Gefuellt', 'Angepasst', 'Vollstaendig']"
               label="Fit-Option"
               outlined
               dense
@@ -120,7 +120,7 @@
             <v-btn color="#333333" @click="addImages">Speichern</v-btn>
           </v-col>
           <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
-            <v-btn color="#333333" @click="closeEditMenu">Abbrechen</v-btn>
+            <v-btn color="#333333" @click="undoEdit">Abbrechen</v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -158,7 +158,7 @@
                   }"
                 >
                   <div
-                    v-show="loggedIn"
+                    v-show="loggedIn && !isAddImageMode"
                     class="edit-button"
                     @click="editImage(rowIndex, colIndex)"
                     style="position: absolute; right: 10px; bottom: 13px"
@@ -166,7 +166,7 @@
                     <v-icon size="40" color="white"> mdi-pencil </v-icon>
                   </div>
                   <div
-                    v-show="loggedIn"
+                    v-show="loggedIn && !isAddImageMode"
                     class="delete-button"
                     @click="deleteImage(rowIndex, colIndex)"
                     style="position: absolute; left: 10px; bottom: 13px"
@@ -184,7 +184,7 @@
         </v-col>
       </v-row>
     </template>
-    <v-container v-show="editMenuOpen" fluid class="pa-0 ma-0">
+    <v-container v-show="loggedIn && isEditMenuOpen && !isEditImageMode" fluid class="pa-0 ma-0">
       <v-row class="ma-0 pa-0 rowelement">
         <v-col
           v-for="(_, index) in numberColumns"
@@ -203,7 +203,7 @@
                 :style="{ padding: allPadding[index] + 'px' }"
               >
                 <div
-                  class="newimageelement"
+                  class="newimageelement newImage"
                   @click="triggerFileInput(index)"
                   @dragover.prevent
                   @drop.prevent="onDropFile($event, index)"
@@ -240,7 +240,11 @@
         </v-col>
       </v-row>
     </v-container>
-    <div v-show="loggedIn && !editMenuOpen" class="addButton" @click="updateEditMenuOpen">
+    <div
+      v-show="loggedIn && !isEditMenuOpen"
+      class="addButton"
+      @click="updateEditMenuAndScrollToBottom"
+    >
       <div class="addButtonInner">
         <div class="addRowButton">
           <v-icon size="61" class="add">mdi-plus-circle</v-icon>
@@ -257,7 +261,11 @@ import { projectStore } from '@/stores/projectStore'
 import Loading_component from '../Loading_component/Loading_component.vue'
 import { v4 as uuidv4 } from 'uuid'
 
-const _isOpen = ref<boolean>(false)
+const _isEditMenuOpen = ref<boolean>(false)
+const _isEditImageMode = ref<boolean>(false)
+const _isAddImageMode = ref<boolean>(false)
+const selectedEditRow = ref<number>(-1)
+const selectedEditCol = ref<number>(-1)
 
 const loggedIn = authStore.loggedIn
 const isLoading = ref(true)
@@ -266,7 +274,6 @@ const loadImages = async () => {
   await projectStore.loadImagesFromGitHub()
   isLoading.value = false
 }
-
 onMounted(async () => {
   await loadImages()
 })
@@ -277,17 +284,14 @@ const selectedColumn = ref(1)
 const allWidth = ref([700, 700, 700, 700])
 const allHeight = ref([600, 600, 600, 600])
 const allPadding = ref([10, 10, 10, 10])
-const allBorderRadius = ref([10, 10, 10, 10])
+const allBorderRadius = ref([3, 3, 3, 3])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
-const allFitOption = ref(['Gefüllt', 'Gefüllt', 'Gefüllt', 'Gefüllt'])
+const allFitOption = ref(['Gefuellt', 'Gefuellt', 'Gefuellt', 'Gefuellt'])
 const allVisible = ref(['Ja', 'Ja', 'Ja', 'Ja'])
 const allNewImgUrls = ref(['', '', '', ''])
-
-const editMenuOpen = ref<boolean>(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const currentIndex = ref<number | null>(null)
-
 // Reactive for numberColumns dropdown
 const columnItems = computed(() => {
   const items = []
@@ -298,18 +302,41 @@ const columnItems = computed(() => {
   return items
 })
 
-const isOpen = computed({
+const isEditMenuOpen = computed({
   get() {
-    return _isOpen.value
+    return _isEditMenuOpen.value
   },
   set(newValue: boolean) {
-    _isOpen.value = newValue
+    _isEditMenuOpen.value = newValue
+  },
+})
+const isEditImageMode = computed({
+  get() {
+    return _isEditImageMode.value
+  },
+  set(newValue: boolean) {
+    _isEditImageMode.value = newValue
+  },
+})
+const isAddImageMode = computed({
+  get() {
+    return _isAddImageMode.value
+  },
+  set(newValue: boolean) {
+    _isAddImageMode.value = newValue
   },
 })
 
-const updateEditMenuOpen = () => {
-  editMenuOpen.value = !editMenuOpen.value
-  isOpen.value = !isOpen.value
+const closeMenu = () => {
+  isEditMenuOpen.value = false
+  isEditImageMode.value = false
+  isAddImageMode.value = false
+  undoEdit()
+}
+
+const updateEditMenuAndScrollToBottom = () => {
+  isEditMenuOpen.value = true
+  isAddImageMode.value = true
   setTimeout(() => {
     window.scrollTo({
       top: document.body.scrollHeight,
@@ -342,17 +369,12 @@ const onDropFile = (event: DragEvent, index: number) => {
 }
 
 const mapFitOption = (fitOption: string): string => {
-  if (fitOption === 'Vollständig') return 'contain'
-  else if (fitOption === 'Gefüllt') return 'cover'
+  if (fitOption === 'Vollstaendig') return 'contain'
+  else if (fitOption === 'Gefuellt') return 'cover'
   else return '100% 100%' // fitOption === Angepasst
 }
 
-const closeEditMenu = () => {
-  editMenuOpen.value = false
-}
-
 const addImages = async (): Promise<boolean> => {
-  editMenuOpen.value = false
   isLoading.value = true
   const addedImagesName = []
   const addedImagesSrc = []
@@ -380,7 +402,7 @@ const addImages = async (): Promise<boolean> => {
   images.value.push(newRow)
   await projectStore.uploadImagesOnGithub(addedImagesName, addedImagesSrc)
   await updateProjectSettingsInStore()
-  closeEditMenu()
+  closeMenu()
   window.scrollTo({
     top: document.body.scrollHeight,
   })
@@ -389,23 +411,19 @@ const addImages = async (): Promise<boolean> => {
 }
 
 const editImage = async (rowIndex: number, colIndex: number = -1) => {
-  _isOpen.value = !_isOpen.value
-  editMenuOpen.value = true
-  if (colIndex !== -1) {
-    numberColumns.value = 1
-    selectedColumn.value = 1
-    allWidth.value = [600, 600, 600, 600]
-    allHeight.value = [600, 600, 600, 600]
-    allPadding.value = [10, 10, 10, 10]
-    allBorderRadius.value = [10, 10, 10, 10]
-    allTitle.value = ['', '', '', '']
-    allDescription.value = ['', '', '', '']
-    allFitOption.value = ['Gefüllt', 'Gefüllt', 'Gefüllt', 'Gefüllt']
-    allVisible.value = ['Ja', 'Ja', 'Ja', 'Ja']
-    allNewImgUrls.value = ['', '', '', '']
-    fileInput.value = null
-    currentIndex.value = null
-  }
+  undoEdit()
+  allWidth.value[0] = images.value[rowIndex][colIndex]['width']
+  allHeight.value[0] = images.value[rowIndex][colIndex]['height']
+  allPadding.value[0] = images.value[rowIndex][colIndex]['padding']
+  allBorderRadius.value[0] = images.value[rowIndex][colIndex]['border_radius']
+  allTitle.value[0] = images.value[rowIndex][colIndex]['title']
+  allDescription.value[0] = images.value[rowIndex][colIndex]['description']
+  allFitOption.value[0] = images.value[rowIndex][colIndex]['objectFit']
+  allVisible.value[0] = images.value[rowIndex][colIndex]['visible']
+  selectedEditRow.value = rowIndex
+  selectedEditCol.value = colIndex
+  isEditMenuOpen.value = true
+  isEditImageMode.value = true
 }
 
 const deleteImage = async (rowIndex: number, colIndex: number = -1) => {
@@ -450,7 +468,7 @@ const undoEdit = () => {
   allBorderRadius.value = [10, 10, 10, 10]
   allTitle.value = ['', '', '', '']
   allDescription.value = ['', '', '', '']
-  allFitOption.value = ['Gefüllt', 'Gefüllt', 'Gefüllt', 'Gefüllt']
+  allFitOption.value = ['Gefuellt', 'Gefuellt', 'Gefuellt', 'Gefuellt']
   allVisible.value = ['Ja', 'Ja', 'Ja', 'Ja']
   allNewImgUrls.value = ['', '', '', '']
   fileInput.value = null
