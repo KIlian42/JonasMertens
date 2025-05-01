@@ -54,8 +54,10 @@ export const useProjectStore = defineStore('project', {
       try {
         const { data } = await axios.get(url)
         if (!data.content) throw new Error('Ungültige API-Antwort.')
-        const parsed = JSON.parse(atob(data.content))
-        if (!parsed.images) throw new Error('Keine Bilddaten gefunden.')
+        const binaryString = atob(data.content)
+        const bytes = Uint8Array.from(binaryString, (char) => char.charCodeAt(0))
+        const decodedJson = new TextDecoder('utf-8').decode(bytes)
+        const parsed = JSON.parse(decodedJson)
         this.images = parsed.images
         for (let rowIndex = 0; rowIndex < this.images.length; rowIndex++) {
           for (let colIndex = 0; colIndex < this.images[rowIndex].length; colIndex++) {

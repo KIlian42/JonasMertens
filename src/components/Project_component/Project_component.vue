@@ -232,7 +232,7 @@
               <div
                 class="newimageelementContainer"
                 style="display: flex; align-items: center; justify-content: center"
-                :style="{ padding: allPadding[index] + 'px' }"
+                :style="{ padding: allPadding[index] + 'px', backgroundColor: 'red' }"
               >
                 <div
                   class="newimageelement newImage"
