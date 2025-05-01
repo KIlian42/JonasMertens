@@ -25,6 +25,8 @@ export const useProjectStore = defineStore('project', {
         width: number
         height: number
         padding: number
+        translateX: number
+        translateY: number
         border_radius: number
         title: string
         description: string

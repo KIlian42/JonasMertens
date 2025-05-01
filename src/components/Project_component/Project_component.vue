@@ -54,7 +54,7 @@
           <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
             <v-text-field
               v-model.number="allPadding[selectedColumn - 1]"
-              label="Abstand"
+              label="Rahmenabstand"
               type="number"
               outlined
               dense
@@ -77,6 +77,36 @@
               @input="
                 allBorderRadius[selectedColumn - 1] = Math.round(
                   allBorderRadius[selectedColumn - 1] || 0,
+                )
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allTranslateX[selectedColumn - 1]"
+              label="Verschiebung X"
+              type="number"
+              outlined
+              dense
+              step="1"
+              @input="
+                allTranslateX[selectedColumn - 1] = Math.round(
+                  allTranslateX[selectedColumn - 1] || 0,
+                )
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allTranslateY[selectedColumn - 1]"
+              label="Verschiebung Y"
+              type="number"
+              outlined
+              dense
+              step="1"
+              @input="
+                allTranslateY[selectedColumn - 1] = Math.round(
+                  allTranslateY[selectedColumn - 1] || 0,
                 )
               "
             ></v-text-field>
@@ -141,7 +171,12 @@
             <v-container fluid class="pa-0 ma-0 child">
               <div
                 class="newimageelementContainer"
-                style="display: flex; align-items: center; justify-content: center"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  overflow: hidden;
+                "
                 :style="{
                   padding:
                     isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
@@ -152,6 +187,10 @@
                 <div
                   class="newimageelement"
                   :style="{
+                    translate:
+                      isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                        ? allTranslateX[0] + 'px ' + allTranslateY[0] + 'px'
+                        : img.translateX + 'px ' + img.translateY + 'px',
                     position: 'relative',
                     width:
                       isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
@@ -232,7 +271,11 @@
               <div
                 class="newimageelementContainer"
                 style="display: flex; align-items: center; justify-content: center"
-                :style="{ padding: allPadding[index] + 'px', backgroundColor: 'red' }"
+                :style="{
+                  padding: allPadding[index] + 'px',
+                  backgroundColor: 'red',
+                  overflow: 'hidden',
+                }"
               >
                 <div
                   class="newimageelement newImage"
@@ -240,6 +283,7 @@
                   @dragover.prevent
                   @drop.prevent="onDropFile($event, index)"
                   :style="{
+                    translate: allTranslateX[index] + 'px ' + allTranslateY[index] + 'px',
                     position: 'relative',
                     width: allWidth[index] + 'px',
                     height: allHeight[index] + 'px',
@@ -315,8 +359,10 @@ const numberColumns = ref(1)
 const selectedColumn = ref(1)
 const allWidth = ref([700, 700, 700, 700])
 const allHeight = ref([600, 600, 600, 600])
-const allPadding = ref([10, 10, 10, 10])
-const allBorderRadius = ref([3, 3, 3, 3])
+const allPadding = ref([0, 0, 0, 0])
+const allTranslateX = ref([0, 0, 0, 0])
+const allTranslateY = ref([0, 0, 0, 0])
+const allBorderRadius = ref([0, 0, 0, 0])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
 const allFitOption = ref(['Gefuellt', 'Gefuellt', 'Gefuellt', 'Gefuellt'])
@@ -423,6 +469,8 @@ const addImages = async (): Promise<boolean> => {
         width: allWidth.value[i],
         height: allHeight.value[i],
         padding: allPadding.value[i],
+        translateX: allTranslateX.value[i],
+        translateY: allTranslateY.value[i],
         border_radius: allBorderRadius.value[i],
         title: allTitle.value[i],
         description: allDescription.value[i],
@@ -437,6 +485,10 @@ const addImages = async (): Promise<boolean> => {
     images.value[selectedEditRow.value][selectedEditCol.value]['width'] = allWidth.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['height'] = allHeight.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['padding'] = allPadding.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['translateX'] =
+      allTranslateX.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['translateY'] =
+      allTranslateY.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['border_radius'] =
       allBorderRadius.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['title'] = allTitle.value[0]
@@ -462,6 +514,8 @@ const editImage = async (rowIndex: number, colIndex: number = -1) => {
   allWidth.value[0] = images.value[rowIndex][colIndex]['width']
   allHeight.value[0] = images.value[rowIndex][colIndex]['height']
   allPadding.value[0] = images.value[rowIndex][colIndex]['padding']
+  allTranslateX.value[0] = images.value[rowIndex][colIndex]['translateX']
+  allTranslateY.value[0] = images.value[rowIndex][colIndex]['translateY']
   allBorderRadius.value[0] = images.value[rowIndex][colIndex]['border_radius']
   allTitle.value[0] = images.value[rowIndex][colIndex]['title']
   allDescription.value[0] = images.value[rowIndex][colIndex]['description']
@@ -517,6 +571,8 @@ const undoEdit = () => {
   allWidth.value = [600, 600, 600, 600]
   allHeight.value = [600, 600, 600, 600]
   allPadding.value = [10, 10, 10, 10]
+  allTranslateX.value = [0, 0, 0, 0]
+  allTranslateY.value = [0, 0, 0, 0]
   allBorderRadius.value = [10, 10, 10, 10]
   allTitle.value = ['', '', '', '']
   allDescription.value = ['', '', '', '']
