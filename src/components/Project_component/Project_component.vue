@@ -111,6 +111,66 @@
               "
             ></v-text-field>
           </v-col>
+
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allCropLeft[selectedColumn - 1]"
+              label="Zuschneiden links"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allCropLeft[selectedColumn - 1] = Math.round(allCropLeft[selectedColumn - 1] || 0)
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allCropRight[selectedColumn - 1]"
+              label="Zuschneiden rechts"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allCropRight[selectedColumn - 1] = Math.round(allCropRight[selectedColumn - 1] || 0)
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allCropTop[selectedColumn - 1]"
+              label="Zuschneiden oben"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allCropTop[selectedColumn - 1] = Math.round(allCropTop[selectedColumn - 1] || 0)
+              "
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
+            <v-text-field
+              v-model.number="allCropBottom[selectedColumn - 1]"
+              label="Zuschneiden unten"
+              type="number"
+              outlined
+              dense
+              step="1"
+              min="0"
+              @input="
+                allCropBottom[selectedColumn - 1] = Math.round(
+                  allCropBottom[selectedColumn - 1] || 0,
+                )
+              "
+            ></v-text-field>
+          </v-col>
+
           <v-col cols="12" sm="12" md="6" class="ma-0 pa-2">
             <v-text-field
               v-model="allTitle[selectedColumn - 1]"
@@ -211,6 +271,26 @@
                         : mapFitOption(img.objectFit),
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
+                    clipPath:
+                      isEditImageMode && selectedEditRow == rowIndex && selectedEditCol == colIndex
+                        ? 'inset(' +
+                          allCropTop[0] +
+                          'px ' +
+                          allCropRight[0] +
+                          'px ' +
+                          allCropBottom[0] +
+                          'px ' +
+                          allCropLeft[0] +
+                          'px)'
+                        : 'inset(' +
+                          img.cropTop +
+                          'px ' +
+                          img.cropRight +
+                          'px ' +
+                          img.cropBottom +
+                          'px ' +
+                          img.cropLeft +
+                          'px)',
                   }"
                 >
                   <div
@@ -288,6 +368,16 @@
                     width: allWidth[index] + 'px',
                     height: allHeight[index] + 'px',
                     borderRadius: allBorderRadius[index] + 'px',
+                    clipPath:
+                      'inset(' +
+                      allCropTop[index] +
+                      'px ' +
+                      allCropRight[index] +
+                      'px ' +
+                      allCropBottom[index] +
+                      'px ' +
+                      allCropLeft[index] +
+                      'px)',
                     ...(allNewImgUrls[index]
                       ? {
                           backgroundImage: 'url(' + allNewImgUrls[index] + ')',
@@ -363,6 +453,10 @@ const allPadding = ref([0, 0, 0, 0])
 const allTranslateX = ref([0, 0, 0, 0])
 const allTranslateY = ref([0, 0, 0, 0])
 const allBorderRadius = ref([0, 0, 0, 0])
+const allCropLeft = ref([0, 0, 0, 0])
+const allCropRight = ref([0, 0, 0, 0])
+const allCropTop = ref([0, 0, 0, 0])
+const allCropBottom = ref([0, 0, 0, 0])
 const allTitle = ref(['', '', '', ''])
 const allDescription = ref(['', '', '', ''])
 const allFitOption = ref(['Gefuellt', 'Gefuellt', 'Gefuellt', 'Gefuellt'])
@@ -471,6 +565,10 @@ const addImages = async (): Promise<boolean> => {
         padding: allPadding.value[i],
         translateX: allTranslateX.value[i],
         translateY: allTranslateY.value[i],
+        cropLeft: allCropLeft.value[i],
+        cropRight: allCropRight.value[i],
+        cropTop: allCropTop.value[i],
+        cropBottom: allCropBottom.value[i],
         border_radius: allBorderRadius.value[i],
         title: allTitle.value[i],
         description: allDescription.value[i],
@@ -489,6 +587,11 @@ const addImages = async (): Promise<boolean> => {
       allTranslateX.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['translateY'] =
       allTranslateY.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['cropLeft'] = allCropLeft.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['cropRight'] = allCropRight.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['cropTop'] = allCropTop.value[0]
+    images.value[selectedEditRow.value][selectedEditCol.value]['cropBottom'] =
+      allCropBottom.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['border_radius'] =
       allBorderRadius.value[0]
     images.value[selectedEditRow.value][selectedEditCol.value]['title'] = allTitle.value[0]
@@ -516,6 +619,10 @@ const editImage = async (rowIndex: number, colIndex: number = -1) => {
   allPadding.value[0] = images.value[rowIndex][colIndex]['padding']
   allTranslateX.value[0] = images.value[rowIndex][colIndex]['translateX']
   allTranslateY.value[0] = images.value[rowIndex][colIndex]['translateY']
+  allCropLeft.value[0] = images.value[rowIndex][colIndex]['cropLeft']
+  allCropRight.value[0] = images.value[rowIndex][colIndex]['cropRight']
+  allCropTop.value[0] = images.value[rowIndex][colIndex]['cropTop']
+  allCropBottom.value[0] = images.value[rowIndex][colIndex]['cropBottom']
   allBorderRadius.value[0] = images.value[rowIndex][colIndex]['border_radius']
   allTitle.value[0] = images.value[rowIndex][colIndex]['title']
   allDescription.value[0] = images.value[rowIndex][colIndex]['description']
@@ -570,10 +677,14 @@ const undoEdit = () => {
   selectedColumn.value = 1
   allWidth.value = [600, 600, 600, 600]
   allHeight.value = [600, 600, 600, 600]
-  allPadding.value = [10, 10, 10, 10]
+  allPadding.value = [0, 0, 0, 0]
   allTranslateX.value = [0, 0, 0, 0]
   allTranslateY.value = [0, 0, 0, 0]
-  allBorderRadius.value = [10, 10, 10, 10]
+  allCropLeft.value = [0, 0, 0, 0]
+  allCropRight.value = [0, 0, 0, 0]
+  allCropTop.value = [0, 0, 0, 0]
+  allCropBottom.value = [0, 0, 0, 0]
+  allBorderRadius.value = [0, 0, 0, 0]
   allTitle.value = ['', '', '', '']
   allDescription.value = ['', '', '', '']
   allFitOption.value = ['Gefuellt', 'Gefuellt', 'Gefuellt', 'Gefuellt']

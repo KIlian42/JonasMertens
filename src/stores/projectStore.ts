@@ -27,6 +27,10 @@ export const useProjectStore = defineStore('project', {
         padding: number
         translateX: number
         translateY: number
+        cropLeft: number
+        cropRight: number
+        cropTop: number
+        cropBottom: number
         border_radius: number
         title: string
         description: string
